@@ -1,1 +1,11 @@
 @import "tailwindcss";
+
+@theme {
+  --color-brand-dark: #05373e;
+  --color-brand: #05846b;
+}
+
+.container {
+  max-width: 1440px;
+  margin: 0 auto;
+}

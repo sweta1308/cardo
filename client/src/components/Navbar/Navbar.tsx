@@ -3,15 +3,20 @@ import logo from '../../assets/logo.webp'
 
 const Navbar = () => {
   return (
-    <nav className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+    <nav className="container sticky shadow-md top-0 z-50 flex items-center justify-between bg-white px-4 py-4 sm:px-6 sm:py-5 lg:px-16">
       <Link to="/">
-        <img src={logo} alt="Logo" className="h-8 w-auto" />
+        <img src={logo} alt="cardo" className="h-9 w-auto sm:h-10 lg:h-12" />
       </Link>
 
-      <ul className="flex items-center gap-6 text-sm font-medium text-gray-700">
-        <li><Link to="/" className="hover:text-gray-900">Home</Link></li>
-        <li><Link to="/about" className="hover:text-gray-900">About</Link></li>
-      </ul>
+      <div className="flex items-center gap-3 sm:gap-8">
+        <a href="#" className="text-base font-medium text-gray-700 hover:text-brand-dark">Log in</a>
+        <a
+          href="#"
+          className="rounded-full bg-brand-dark px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand sm:px-5 sm:py-2.5"
+        >
+          Get Started
+        </a>
+      </div>
     </nav>
   )
 }
