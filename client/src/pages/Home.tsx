@@ -22,7 +22,7 @@ const Home = () => {
 
         <div className="mt-8 flex items-center justify-center gap-4">
           <a
-            href="#"
+            href="/login"
             className="rounded-full bg-brand-dark px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand"
           >
             Get Started for Free

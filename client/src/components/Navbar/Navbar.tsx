@@ -9,13 +9,13 @@ const Navbar = () => {
       </Link>
 
       <div className="flex items-center gap-3 sm:gap-8">
-        <a href="#" className="text-base font-medium text-gray-700 hover:text-brand-dark">Log in</a>
-        <a
-          href="#"
+        <Link to="/login" className="text-base font-medium text-gray-700 hover:text-brand-dark">Log in</Link>
+        <Link
+          to="/register"
           className="rounded-full bg-brand-dark px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand sm:px-5 sm:py-2.5"
         >
           Get Started
-        </a>
+        </Link>
       </div>
     </nav>
   )
