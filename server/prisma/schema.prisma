@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id               Int               @id @default(autoincrement())
+  name             String
+  email            String            @unique
+  password         String
+  workspaces       Workspace[]
+  workspaceMembers WorkspaceMember[]
+  boards           Board[]
+  boardMembers     BoardMember[]
+  cards            Card[]
+}
+
+model Workspace {
+  id               Int               @id @default(autoincrement())
+  name             String
+  description      String
+  owner_id         Int
+  created_at       DateTime          @default(now())
+  updated_at       DateTime          @updatedAt
+  owner            User              @relation(fields: [owner_id], references: [id])
+  workspaceMembers WorkspaceMember[]
+  boards           Board[]
+}
+
+model WorkspaceMember {
+  id           Int       @id @default(autoincrement())
+  workspace_id Int
+  user_id      Int
+  role         Role
+  created_at   DateTime  @default(now())
+  workspace    Workspace @relation(fields: [workspace_id], references: [id])
+  user         User      @relation(fields: [user_id], references: [id])
+
+  @@unique([workspace_id, user_id])
+}
+
+enum Role {
+  Owner
+  Admin
+  Member
+}
+
+model Board {
+  id           Int           @id @default(autoincrement())
+  name         String
+  description  String
+  workspace_id Int
+  background   String
+  created_by   Int
+  created_at   DateTime      @default(now())
+  updated_at   DateTime      @updatedAt
+  workspace    Workspace     @relation(fields: [workspace_id], references: [id])
+  user         User          @relation(fields: [created_by], references: [id])
+  boardMembers BoardMember[]
+  lists        List[]
+}
+
+model BoardMember {
+  id         Int      @id @default(autoincrement())
+  role       Role
+  board_id   Int
+  user_id    Int
+  created_at DateTime @default(now())
+  board      Board    @relation(fields: [board_id], references: [id])
+  user       User     @relation(fields: [user_id], references: [id])
+
+  @@unique([board_id, user_id])
+}
+
+model List {
+  id         Int      @id @default(autoincrement())
+  name       String
+  position   Float
+  board_id   Int
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  board      Board    @relation(fields: [board_id], references: [id])
+  cards      Card[]
+}
+
+model Card {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  position    Float
+  list_id     Int
+  due_date    DateTime?
+  created_by  Int
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  list        List     @relation(fields: [list_id], references: [id])
+  user        User     @relation(fields: [created_by], references: [id])
+}
