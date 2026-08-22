@@ -1,9 +1,14 @@
 import sparkle from '../assets/sparkle.svg'
 import kanbanBoard from '../assets/kanban-board.svg'
+import Seo from '../components/Seo'
 
 const Home = () => {
   return (
     <div className="relative overflow-hidden bg-linear-to-b from-emerald-50 via-white to-white">
+      <Seo
+        title="Project Management & Team Collaboration Software"
+        description="Cardo is the project management tool that helps teams plan sprints, track tasks on Kanban boards, and ship projects together. Get started for free."
+      />
       <img src={sparkle} alt="Sparkle 1" className="absolute top-24 right-10 hidden h-6 w-6 opacity-60 sm:right-20 sm:block lg:right-40" />
       <img src={sparkle} alt="Sparkle 2" className="absolute top-44 right-4 hidden h-4 w-4 opacity-50 sm:right-8 sm:block lg:right-16" />
       <img src={sparkle} alt="Sparkle 3" className="absolute top-72 right-14 hidden h-3 w-3 opacity-70 sm:right-28 sm:block lg:right-56" />

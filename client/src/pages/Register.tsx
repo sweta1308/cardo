@@ -2,10 +2,15 @@ import { Link } from 'react-router-dom'
 import AuthShell from '../components/Auth/AuthShell'
 import PasswordInput from '../components/Auth/PasswordInput'
 import { inputClass, labelClass } from '../components/Auth/formStyles'
+import Seo from '../components/Seo'
 
 const Register = () => {
   return (
     <AuthShell>
+      <Seo
+        title="Sign Up for Free"
+        description="Create your free Cardo account and start planning sprints, tracking tasks, and collaborating with your team today."
+      />
       <h1 className="text-2xl font-bold text-gray-900">Create your account</h1>
       <p className="mt-1 text-sm text-gray-500">Get started with cardo</p>
 

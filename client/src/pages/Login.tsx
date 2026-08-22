@@ -2,10 +2,15 @@ import { Link } from 'react-router-dom'
 import AuthShell from '../components/Auth/AuthShell'
 import PasswordInput from '../components/Auth/PasswordInput'
 import { inputClass, labelClass } from '../components/Auth/formStyles'
+import Seo from '../components/Seo'
 
 const Login = () => {
   return (
     <AuthShell>
+      <Seo
+        title="Log In"
+        description="Sign in to your Cardo workspace to plan sprints, track tasks, and collaborate with your team."
+      />
       <h1 className="text-2xl font-bold text-gray-900">
         Welcome back <span aria-hidden="true">👋</span>
       </h1>
