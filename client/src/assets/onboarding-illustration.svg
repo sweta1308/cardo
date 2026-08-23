@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 420">
+  <defs>
+    <linearGradient id="sidebarGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0d9488" />
+      <stop offset="1" stop-color="#05373e" />
+    </linearGradient>
+    <linearGradient id="potGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#0d9488" />
+      <stop offset="1" stop-color="#05846b" />
+    </linearGradient>
+  </defs>
+
+  <!-- backdrop blob -->
+  <path
+    d="M60 250 C10 190 30 90 130 60 C210 36 260 84 330 70 C410 54 460 8 530 40 C600 72 630 160 590 230 C555 292 470 300 400 320 C320 342 250 372 170 350 C100 331 100 300 60 250 Z"
+    fill="#eafaf3"
+  />
+
+  <!-- sparkles -->
+  <g fill="#0d9488">
+    <path d="M84 96 l4 10 10 4 -10 4 -4 10 -4 -10 -10 -4 10 -4 Z" opacity="0.55" />
+    <path d="M556 118 l3 8 8 3 -8 3 -3 8 -3 -8 -8 -3 8 -3 Z" opacity="0.45" />
+    <path d="M104 300 l3 7 7 3 -7 3 -3 7 -3 -7 -7 -3 7 -3 Z" opacity="0.5" />
+    <path d="M520 260 l4 9 9 4 -9 4 -4 9 -4 -9 -9 -4 9 -4 Z" opacity="0.4" />
+  </g>
+
+  <!-- paper airplane + trail -->
+  <path
+    d="M470 70 C500 66 525 78 548 64"
+    fill="none"
+    stroke="#0d9488"
+    stroke-width="2"
+    stroke-dasharray="4 6"
+    opacity="0.5"
+  />
+  <path
+    d="M556 50 L522 60 L534 68 L530 84 Z"
+    fill="#05846b"
+    transform="rotate(18 540 65)"
+  />
+
+  <!-- app card shadow -->
+  <rect x="182" y="98" width="300" height="228" rx="16" fill="#05373e" opacity="0.08" />
+
+  <!-- app card -->
+  <g>
+    <rect x="176" y="90" width="300" height="220" rx="16" fill="#ffffff" />
+    <rect x="176" y="90" width="300" height="220" rx="16" fill="none" stroke="#e5f3ee" />
+
+    <!-- sidebar -->
+    <path d="M176 106 a16 16 0 0 1 16 -16 h20 v220 h-20 a16 16 0 0 1 -16 -16 Z" fill="url(#sidebarGrad)" />
+    <circle cx="196" cy="112" r="3.5" fill="#ffffff" opacity="0.9" />
+    <g fill="#ffffff" opacity="0.75">
+      <rect x="188" y="134" width="16" height="5" rx="2.5" />
+      <rect x="188" y="150" width="16" height="5" rx="2.5" />
+      <rect x="188" y="166" width="16" height="5" rx="2.5" />
+      <rect x="188" y="182" width="16" height="5" rx="2.5" />
+      <rect x="188" y="198" width="16" height="5" rx="2.5" />
+    </g>
+
+    <!-- top bar -->
+    <rect x="228" y="106" width="70" height="8" rx="4" fill="#e5f3ee" />
+    <path d="M456 106 l2.6 1.4 v3 l-2.6 -1.6 -2.6 1.6 v-3 Z" fill="#0d9488" opacity="0.6" />
+
+    <!-- columns -->
+    <g>
+      <rect x="228" y="130" width="72" height="6" rx="3" fill="#0d9488" opacity="0.7" />
+      <rect x="228" y="146" width="72" height="40" rx="8" fill="#eafaf3" />
+      <rect x="238" y="156" width="40" height="4" rx="2" fill="#0d9488" opacity="0.55" />
+      <rect x="238" y="166" width="28" height="4" rx="2" fill="#0d9488" opacity="0.35" />
+      <rect x="228" y="192" width="72" height="40" rx="8" fill="#eafaf3" />
+      <rect x="238" y="202" width="36" height="4" rx="2" fill="#0d9488" opacity="0.55" />
+      <rect x="238" y="212" width="24" height="4" rx="2" fill="#0d9488" opacity="0.35" />
+    </g>
+
+    <g>
+      <rect x="312" y="130" width="72" height="6" rx="3" fill="#38bdf8" opacity="0.7" />
+      <rect x="312" y="146" width="72" height="40" rx="8" fill="#f0f9ff" />
+      <rect x="322" y="156" width="40" height="4" rx="2" fill="#38bdf8" opacity="0.55" />
+      <rect x="322" y="166" width="28" height="4" rx="2" fill="#38bdf8" opacity="0.35" />
+    </g>
+
+    <g>
+      <rect x="396" y="130" width="60" height="6" rx="3" fill="#fbbf24" opacity="0.7" />
+      <rect x="396" y="146" width="60" height="40" rx="8" fill="#fffbeb" />
+      <rect x="406" y="156" width="32" height="4" rx="2" fill="#fbbf24" opacity="0.55" />
+      <rect x="406" y="166" width="22" height="4" rx="2" fill="#fbbf24" opacity="0.35" />
+    </g>
+  </g>
+
+  <!-- left plant -->
+  <g>
+    <path d="M96 372 h44 l-6 34 h-32 Z" fill="url(#potGrad)" />
+    <path d="M118 372 C104 330 92 320 74 312 C92 336 96 356 106 372 Z" fill="#0d9488" />
+    <path d="M118 372 C114 316 122 296 118 268 C130 300 128 336 128 372 Z" fill="#05846b" />
+    <path d="M118 372 C132 332 148 322 166 316 C148 338 140 358 132 372 Z" fill="#0d9488" opacity="0.9" />
+  </g>
+
+  <!-- right plant -->
+  <g>
+    <path d="M574 396 C556 344 566 312 552 276 C542 320 546 364 552 396 Z" fill="#05846b" />
+    <path d="M574 396 C586 350 606 336 626 332 C604 356 594 378 588 396 Z" fill="#0d9488" />
+    <path d="M574 396 C560 358 542 348 522 348 C544 364 552 382 556 396 Z" fill="#0d9488" opacity="0.85" />
+  </g>
+</svg>

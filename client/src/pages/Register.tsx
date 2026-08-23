@@ -1,10 +1,19 @@
-import { Link } from 'react-router-dom'
+import { useState, type FormEvent } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import AuthShell from '../components/Auth/AuthShell'
 import PasswordInput from '../components/Auth/PasswordInput'
 import { inputClass, labelClass } from '../components/Auth/formStyles'
 import Seo from '../components/Seo'
 
 const Register = () => {
+  const navigate = useNavigate()
+  const [name, setName] = useState('')
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault()
+    navigate('/onboarding', { state: { name } })
+  }
+
   return (
     <AuthShell>
       <Seo
@@ -14,7 +23,7 @@ const Register = () => {
       <h1 className="text-2xl font-bold text-gray-900">Create your account</h1>
       <p className="mt-1 text-sm text-gray-500">Get started with cardo</p>
 
-      <form className="mt-6 space-y-4">
+      <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
         <div>
           <label htmlFor="name" className={labelClass}>
             Name
@@ -26,6 +35,8 @@ const Register = () => {
             autoComplete="name"
             placeholder="Jane Doe"
             className={inputClass}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
           />
         </div>
 
