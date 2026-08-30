@@ -17,6 +17,7 @@ model User {
   boards           Board[]
   boardMembers     BoardMember[]
   cards            Card[]
+  cardMembers      CardMember[]
 }
 
 model Workspace {
@@ -88,15 +89,27 @@ model List {
 }
 
 model Card {
-  id          Int      @id @default(autoincrement())
+  id          Int          @id @default(autoincrement())
   title       String
   description String?
   position    Float
   list_id     Int
   due_date    DateTime?
   created_by  Int
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
-  list        List     @relation(fields: [list_id], references: [id], onDelete: Cascade)
-  user        User     @relation(fields: [created_by], references: [id])
+  created_at  DateTime     @default(now())
+  updated_at  DateTime     @updatedAt
+  list        List         @relation(fields: [list_id], references: [id], onDelete: Cascade)
+  user        User         @relation(fields: [created_by], references: [id])
+  cardMembers CardMember[]
+}
+
+model CardMember {
+  id         Int      @id @default(autoincrement())
+  card_id    Int
+  user_id    Int
+  created_at DateTime @default(now())
+  card       Card     @relation(fields: [card_id], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [user_id], references: [id])
+
+  @@unique([card_id, user_id])
 }
