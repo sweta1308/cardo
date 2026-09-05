@@ -1,10 +1,35 @@
-import { Link } from 'react-router-dom'
+import { useState, type FormEvent } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import toast from 'react-hot-toast'
 import AuthShell from '../components/Auth/AuthShell'
 import PasswordInput from '../components/Auth/PasswordInput'
 import { inputClass, labelClass } from '../components/Auth/formStyles'
 import Seo from '../components/Seo'
+import { ApiError, login } from '../lib/api'
 
 const Login = () => {
+  const navigate = useNavigate()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault()
+
+    setIsSubmitting(true)
+    try {
+      const { user, token } = await login(email, password)
+      localStorage.setItem('token', token)
+      localStorage.setItem('user', JSON.stringify(user))
+      toast.success(`Welcome back, ${user.name}`)
+      navigate('/onboarding')
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : 'Something went wrong')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
     <AuthShell>
       <Seo
@@ -16,7 +41,7 @@ const Login = () => {
       </h1>
       <p className="mt-1 text-sm text-gray-500">Sign in to your workspace</p>
 
-      <form className="mt-6 space-y-4">
+      <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
         <div>
           <label htmlFor="email" className={labelClass}>
             Email
@@ -28,6 +53,8 @@ const Login = () => {
             autoComplete="email"
             placeholder="you@example.com"
             className={inputClass}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
         </div>
 
@@ -36,13 +63,16 @@ const Login = () => {
           label="Password"
           placeholder="Enter your password"
           autoComplete="current-password"
+          value={password}
+          onChange={setPassword}
         />
 
         <button
           type="submit"
-          className="w-full cursor-pointer rounded-full bg-brand-dark py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand"
+          disabled={isSubmitting}
+          className="w-full cursor-pointer rounded-full bg-brand-dark py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand disabled:cursor-not-allowed disabled:opacity-60"
         >
-          Sign in
+          {isSubmitting ? 'Signing in…' : 'Sign in'}
         </button>
       </form>
 

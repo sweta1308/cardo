@@ -8,9 +8,11 @@ interface PasswordInputProps {
   label: string
   placeholder: string
   autoComplete: string
+  value: string
+  onChange: (value: string) => void
 }
 
-const PasswordInput = ({ id, label, placeholder, autoComplete }: PasswordInputProps) => {
+const PasswordInput = ({ id, label, placeholder, autoComplete, value, onChange }: PasswordInputProps) => {
   const [visible, setVisible] = useState(false)
 
   return (
@@ -26,6 +28,8 @@ const PasswordInput = ({ id, label, placeholder, autoComplete }: PasswordInputPr
           autoComplete={autoComplete}
           placeholder={placeholder}
           className={`${inputClass} pr-10`}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
         />
         <button
           type="button"

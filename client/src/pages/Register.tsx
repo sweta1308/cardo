@@ -1,17 +1,40 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import toast from 'react-hot-toast'
 import AuthShell from '../components/Auth/AuthShell'
 import PasswordInput from '../components/Auth/PasswordInput'
 import { inputClass, labelClass } from '../components/Auth/formStyles'
 import Seo from '../components/Seo'
+import { ApiError, signup } from '../lib/api'
 
 const Register = () => {
   const navigate = useNavigate()
   const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
-    navigate('/onboarding', { state: { name } })
+
+    if (password !== confirmPassword) {
+      toast.error('Passwords do not match')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const { user, token } = await signup(name, email, password)
+      localStorage.setItem('token', token)
+      localStorage.setItem('user', JSON.stringify(user))
+      toast.success('Account created successfully')
+      navigate('/onboarding')
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : 'Something went wrong')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -51,23 +74,35 @@ const Register = () => {
             autoComplete="email"
             placeholder="you@example.com"
             className={inputClass}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
         </div>
 
-        <PasswordInput id="password" label="Password" placeholder="Create a password" autoComplete="new-password" />
+        <PasswordInput
+          id="password"
+          label="Password"
+          placeholder="Create a password"
+          autoComplete="new-password"
+          value={password}
+          onChange={setPassword}
+        />
 
         <PasswordInput
           id="confirm-password"
           label="Confirm password"
           placeholder="Re-enter your password"
           autoComplete="new-password"
+          value={confirmPassword}
+          onChange={setConfirmPassword}
         />
 
         <button
           type="submit"
-          className="w-full cursor-pointer rounded-full bg-brand-dark py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand"
+          disabled={isSubmitting}
+          className="w-full cursor-pointer rounded-full bg-brand-dark py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand disabled:cursor-not-allowed disabled:opacity-60"
         >
-          Create account
+          {isSubmitting ? 'Creating account…' : 'Create account'}
         </button>
       </form>
 

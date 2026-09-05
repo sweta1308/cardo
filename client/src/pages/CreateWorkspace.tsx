@@ -1,18 +1,14 @@
 import { useState, type FormEvent } from 'react'
-import { useLocation } from 'react-router-dom'
+import logo from '../assets/logo.webp'
 import logoWhite from '../assets/logo-white.webp'
 import onboardingIllustration from '../assets/onboarding-illustration.svg'
 import { inputClass, labelClass } from '../components/Auth/formStyles'
 import Seo from '../components/Seo'
-
-interface LocationState {
-  name?: string
-}
+import { getStoredUser } from '../lib/auth'
 
 const CreateWorkspace = () => {
-  const location = useLocation()
-  const { name } = (location.state as LocationState) ?? {}
-  const firstName = name?.split(' ')[0] ?? 'there'
+  const user = getStoredUser()
+  const firstName = user?.name.split(' ')[0] ?? 'there'
   const initial = firstName.charAt(0).toUpperCase()
 
   const [workspaceName, setWorkspaceName] = useState('')
@@ -22,10 +18,10 @@ const CreateWorkspace = () => {
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="grid min-h-screen bg-gray-50 md:grid-cols-[16rem_1fr]">
       <Seo title="Create your workspace" description="Create your first workspace to start organizing your projects." />
 
-      <aside className="hidden w-64 flex-col justify-between bg-brand-dark px-5 py-6 text-white md:flex">
+      <aside className="hidden flex-col justify-between bg-brand-dark px-5 py-6 text-white md:sticky md:top-0 md:flex md:h-screen">
         <div>
           <img src={logoWhite} alt="cardo" className="h-12 w-auto" />
 
@@ -40,9 +36,11 @@ const CreateWorkspace = () => {
         </div>
       </aside>
 
-      <div className="flex flex-1 flex-col">
-        <header className="flex items-center justify-end gap-4 border-b border-gray-200 bg-white px-10 py-4">
-          <div className="flex items-center gap-2">
+      <div className="flex flex-col">
+        <header className="flex items-center justify-between gap-4 border-b border-gray-200 bg-white px-4 py-4 sm:px-10">
+          <img src={logo} alt="cardo" className="h-8 w-auto md:hidden" />
+
+          <div className="ml-auto flex items-center gap-2">
             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-dark text-sm font-semibold text-white">
               {initial}
             </span>
