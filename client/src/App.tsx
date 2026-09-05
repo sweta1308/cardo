@@ -5,6 +5,7 @@ import Home from './pages/Home'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import CreateWorkspace from './pages/CreateWorkspace'
+import CreateBoard from './pages/CreateBoard'
 import ProtectedRoute from './components/ProtectedRoute'
 import GuestRoute from './components/GuestRoute'
 import RedirectIfAuthenticated from './components/RedirectIfAuthenticated'
@@ -46,6 +47,14 @@ function App() {
         element={
           <ProtectedRoute>
             <CreateWorkspace />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/onboarding/board"
+        element={
+          <ProtectedRoute>
+            <CreateBoard />
           </ProtectedRoute>
         }
       />

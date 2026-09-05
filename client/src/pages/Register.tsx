@@ -6,9 +6,11 @@ import PasswordInput from '../components/Auth/PasswordInput'
 import { inputClass, labelClass } from '../components/Auth/formStyles'
 import Seo from '../components/Seo'
 import { ApiError, signup } from '../lib/api'
+import { useAuthStore } from '../store/authStore'
 
 const Register = () => {
   const navigate = useNavigate()
+  const setAuth = useAuthStore((state) => state.setAuth)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -26,8 +28,7 @@ const Register = () => {
     setIsSubmitting(true)
     try {
       const { user, token } = await signup(name, email, password)
-      localStorage.setItem('token', token)
-      localStorage.setItem('user', JSON.stringify(user))
+      setAuth(user, token)
       toast.success('Account created successfully')
       navigate('/onboarding')
     } catch (err) {

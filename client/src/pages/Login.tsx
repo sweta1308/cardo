@@ -6,9 +6,11 @@ import PasswordInput from '../components/Auth/PasswordInput'
 import { inputClass, labelClass } from '../components/Auth/formStyles'
 import Seo from '../components/Seo'
 import { ApiError, login } from '../lib/api'
+import { useAuthStore } from '../store/authStore'
 
 const Login = () => {
   const navigate = useNavigate()
+  const setAuth = useAuthStore((state) => state.setAuth)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -19,8 +21,7 @@ const Login = () => {
     setIsSubmitting(true)
     try {
       const { user, token } = await login(email, password)
-      localStorage.setItem('token', token)
-      localStorage.setItem('user', JSON.stringify(user))
+      setAuth(user, token)
       toast.success(`Welcome back, ${user.name}`)
       navigate('/onboarding')
     } catch (err) {

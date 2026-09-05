@@ -1,4 +1,5 @@
 import axios, { AxiosError } from 'axios'
+import { useAuthStore } from '../store/authStore'
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api'
 
@@ -27,9 +28,9 @@ export const apiClient = axios.create({
 })
 
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token')
+  const token = useAuthStore.getState().token
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`
+    config.headers.token = token
   }
   return config
 })
@@ -50,5 +51,64 @@ export async function signup(name: string, email: string, password: string) {
 
 export async function login(email: string, password: string) {
   const { data } = await apiClient.post<AuthResponse>('/login', { email, password })
+  return data
+}
+
+export type Role = 'Owner' | 'Admin' | 'Member'
+
+export interface Workspace {
+  id: number
+  name: string
+  description: string
+  owner_id: number
+  created_at: string
+  updated_at: string
+}
+
+export interface WorkspaceWithRole extends Workspace {
+  role: Role
+}
+
+export interface Board {
+  id: number
+  name: string
+  description: string
+  workspace_id: number
+  background: string
+  created_by: number
+  created_at: string
+  updated_at: string
+}
+
+export interface BoardWithRole extends Board {
+  role: Role
+}
+
+export async function createWorkspace(name: string, description: string) {
+  const { data } = await apiClient.post<Workspace>('/workspaces', { name, description })
+  return data
+}
+
+export async function getWorkspace(workspaceId: number) {
+  const { data } = await apiClient.get<WorkspaceWithRole>(`/workspaces/${workspaceId}`)
+  return data
+}
+
+interface CreateBoardPayload {
+  workspace_id: number
+  name: string
+  description: string
+  background: string
+}
+
+export async function createBoard(payload: CreateBoardPayload) {
+  const { data } = await apiClient.post<Board>('/boards', payload)
+  return data
+}
+
+export async function getBoards(workspaceId: number) {
+  const { data } = await apiClient.get<BoardWithRole[]>('/boards', {
+    params: { workspace_id: workspaceId },
+  })
   return data
 }

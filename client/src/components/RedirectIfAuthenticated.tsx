@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Navigate } from 'react-router-dom'
-import { isAuthenticated } from '../lib/auth'
+import { useAuthStore } from '../store/authStore'
 
 interface RedirectIfAuthenticatedProps {
   to: string
@@ -8,7 +8,9 @@ interface RedirectIfAuthenticatedProps {
 }
 
 const RedirectIfAuthenticated = ({ to, children }: RedirectIfAuthenticatedProps) => {
-  if (isAuthenticated()) {
+  const token = useAuthStore((state) => state.token)
+
+  if (token) {
     return <Navigate to={to} replace />
   }
 

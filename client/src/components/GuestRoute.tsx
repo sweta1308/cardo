@@ -1,12 +1,12 @@
 import type { ReactNode } from 'react'
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { isAuthenticated } from '../lib/auth'
+import { useAuthStore } from '../store/authStore'
 import { getLastPath } from '../lib/lastPath'
 
 const GuestRoute = ({ children }: { children: ReactNode }) => {
   const navigate = useNavigate()
-  const authenticated = isAuthenticated()
+  const authenticated = useAuthStore((state) => Boolean(state.token))
 
   useEffect(() => {
     if (!authenticated) return
