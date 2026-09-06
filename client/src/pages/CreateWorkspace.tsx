@@ -7,10 +7,12 @@ import OnboardingShell from '../components/Onboarding/OnboardingShell'
 import Seo from '../components/Seo'
 import { ApiError, createWorkspace } from '../lib/api'
 import { useAuthStore } from '../store/authStore'
+import { useWorkspaceStore } from '../store/workspaceStore'
 
 const CreateWorkspace = () => {
   const navigate = useNavigate()
   const user = useAuthStore((state) => state.user)
+  const setWorkspace = useWorkspaceStore((state) => state.setWorkspace)
   const firstName = user?.name.split(' ')[0] ?? 'there'
 
   const [name, setName] = useState('')
@@ -23,8 +25,9 @@ const CreateWorkspace = () => {
     setIsSubmitting(true)
     try {
       const workspace = await createWorkspace(name, description)
+      setWorkspace(workspace)
       toast.success('Workspace created')
-      navigate(`/onboarding/board?workspaceId=${workspace.id}`)
+      navigate(`/boards/new?workspaceId=${workspace.id}`)
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : 'Something went wrong')
     } finally {

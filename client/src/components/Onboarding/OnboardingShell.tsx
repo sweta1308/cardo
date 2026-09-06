@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import logo from '../../assets/logo.webp'
 import logoWhite from '../../assets/logo-white.webp'
-import { useAuthStore } from '../../store/authStore'
+import UserBadge from '../UserBadge'
 
 interface OnboardingShellProps {
   stepLabel: string
@@ -9,10 +9,6 @@ interface OnboardingShellProps {
 }
 
 const OnboardingShell = ({ stepLabel, children }: OnboardingShellProps) => {
-  const user = useAuthStore((state) => state.user)
-  const firstName = user?.name.split(' ')[0] ?? 'there'
-  const initial = firstName.charAt(0).toUpperCase()
-
   return (
     <div className="grid min-h-screen bg-gray-50 md:grid-cols-[16rem_1fr]">
       <aside className="hidden flex-col justify-between bg-brand-dark px-5 py-6 text-white md:sticky md:top-0 md:flex md:h-screen">
@@ -34,11 +30,8 @@ const OnboardingShell = ({ stepLabel, children }: OnboardingShellProps) => {
         <header className="flex items-center justify-between gap-4 border-b border-gray-200 bg-white px-4 py-4 sm:px-10">
           <img src={logo} alt="cardo" className="h-8 w-auto md:hidden" />
 
-          <div className="ml-auto flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-dark text-sm font-semibold text-white">
-              {initial}
-            </span>
-            <span className="text-sm font-medium text-gray-700">{firstName}</span>
+          <div className="ml-auto">
+            <UserBadge />
           </div>
         </header>
 

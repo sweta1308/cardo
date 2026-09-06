@@ -7,10 +7,12 @@ import { inputClass, labelClass } from '../components/Auth/formStyles'
 import Seo from '../components/Seo'
 import { ApiError, login } from '../lib/api'
 import { useAuthStore } from '../store/authStore'
+import { useWorkspaceStore } from '../store/workspaceStore'
 
 const Login = () => {
   const navigate = useNavigate()
   const setAuth = useAuthStore((state) => state.setAuth)
+  const resolveWorkspace = useWorkspaceStore((state) => state.resolveWorkspace)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -23,7 +25,9 @@ const Login = () => {
       const { user, token } = await login(email, password)
       setAuth(user, token)
       toast.success(`Welcome back, ${user.name}`)
-      navigate('/onboarding')
+
+      const workspace = await resolveWorkspace()
+      navigate(workspace ? '/dashboard' : '/onboarding')
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : 'Something went wrong')
     } finally {

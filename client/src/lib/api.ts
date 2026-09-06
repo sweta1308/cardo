@@ -94,6 +94,23 @@ export async function getWorkspace(workspaceId: number) {
   return data
 }
 
+export async function getWorkspaces() {
+  const { data } = await apiClient.get<WorkspaceWithRole[]>('/workspaces')
+  return data
+}
+
+export interface WorkspaceMember {
+  id: number
+  name: string
+  email: string
+  role: Role
+}
+
+export async function getWorkspaceMembers(workspaceId: number) {
+  const { data } = await apiClient.get<WorkspaceMember[]>(`/workspaces/${workspaceId}/members`)
+  return data
+}
+
 interface CreateBoardPayload {
   workspace_id: number
   name: string
@@ -110,5 +127,10 @@ export async function getBoards(workspaceId: number) {
   const { data } = await apiClient.get<BoardWithRole[]>('/boards', {
     params: { workspace_id: workspaceId },
   })
+  return data
+}
+
+export async function getBoard(boardId: number) {
+  const { data } = await apiClient.get<BoardWithRole>(`/boards/${boardId}`)
   return data
 }
