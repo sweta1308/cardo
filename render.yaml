@@ -5,8 +5,8 @@ services:
     rootDir: server
     plan: free
     # Dev dependencies are needed here: the Prisma CLI runs generate and migrate.
-    buildCommand: npm install && npm run build
-    preDeployCommand: npm run migrate:deploy
+    # Migrations run in the build because preDeployCommand requires a paid plan.
+    buildCommand: npm install && npm run build && npm run migrate:deploy
     startCommand: npm run start
     healthCheckPath: /health
     envVars:
