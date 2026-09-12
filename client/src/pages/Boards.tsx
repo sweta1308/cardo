@@ -105,7 +105,10 @@ const Boards = () => {
               <div className="p-4">
                 <p className="font-semibold text-gray-900">{board.name}</p>
                 <p className="mt-0.5 line-clamp-1 text-sm text-gray-500">{board.description}</p>
-                <p className="mt-2 text-xs text-gray-400">Updated {timeAgo(board.updated_at)}</p>
+                <p className="mt-2 text-xs text-gray-400">
+                  {board.card_count ?? 0} {board.card_count === 1 ? 'card' : 'cards'} · Updated{' '}
+                  {timeAgo(board.updated_at)}
+                </p>
               </div>
             </Link>
           ))}

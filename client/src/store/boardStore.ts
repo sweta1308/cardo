@@ -1,14 +1,15 @@
 import { create } from 'zustand'
 import {
+  assignCardMember,
   createCard,
   createList,
   deleteCard,
   deleteList,
   getBoard,
-  getCards,
-  getLists,
+  getBoardMembers,
   updateCard,
   updateList,
+  type BoardMember,
   type BoardWithRole,
   type Card,
   type List,
@@ -21,50 +22,68 @@ export interface ListWithCards extends List {
 interface BoardState {
   board: BoardWithRole | null
   lists: ListWithCards[]
+  members: BoardMember[]
   isLoading: boolean
   load: (boardId: number) => Promise<void>
+  refreshMembers: () => Promise<void>
   addList: (name: string) => Promise<void>
   renameList: (listId: number, name: string) => Promise<void>
   removeList: (listId: number) => Promise<void>
-  addCard: (listId: number, title: string) => Promise<void>
+  moveList: (listId: number, beforeListId: number | null) => Promise<void>
+  addCard: (
+    listId: number,
+    data: { title: string; description?: string; due_date?: string | null; assigneeEmails?: string[] },
+  ) => Promise<void>
   editCard: (cardId: number, patch: { title?: string; description?: string; due_date?: string | null }) => Promise<void>
   moveCard: (cardId: number, toListId: number, beforeCardId: number | null) => Promise<void>
   removeCard: (cardId: number) => Promise<void>
   reset: () => void
 }
 
-// Positions are floats so an item can always be slotted between two neighbours.
 const POSITION_GAP = 1024
 
-function positionForMove(cards: Card[], beforeCardId: number | null) {
-  const index = beforeCardId === null ? cards.length : cards.findIndex((c) => c.id === beforeCardId)
-  const target = index === -1 ? cards.length : index
+let draftCounter = 0
+const draftId = () => (draftCounter -= 1)
 
-  const prev = cards[target - 1]
-  const next = cards[target]
+export const isDraft = (id: number) => id < 0
 
-  if (!prev && !next) return POSITION_GAP
-  if (!prev) return next.position / 2
-  if (!next) return prev.position + POSITION_GAP
-  return (prev.position + next.position) / 2
+function slotFor(items: { id: number; position: number }[], beforeId: number | null) {
+  const found = beforeId === null ? -1 : items.findIndex((i) => i.id === beforeId)
+  const index = beforeId === null || found === -1 ? items.length : found
+
+  const prev = items[index - 1]
+  const next = items[index]
+
+  const position = !prev && !next
+    ? POSITION_GAP
+    : !prev
+      ? next.position / 2
+      : !next
+        ? prev.position + POSITION_GAP
+        : (prev.position + next.position) / 2
+
+  return { index, position }
 }
 
 export const useBoardStore = create<BoardState>((set, get) => ({
   board: null,
   lists: [],
+  members: [],
   isLoading: false,
 
-  reset: () => set({ board: null, lists: [], isLoading: false }),
+  reset: () => set({ board: null, lists: [], members: [], isLoading: false }),
+
+  refreshMembers: async () => {
+    const board = get().board
+    if (!board) return
+    set({ members: await getBoardMembers(board.id) })
+  },
 
   load: async (boardId) => {
     set({ isLoading: true })
     try {
-      const [board, lists] = await Promise.all([getBoard(boardId), getLists(boardId)])
-      // Cards are only fetchable per list, so fan out across the board's lists.
-      const withCards = await Promise.all(
-        lists.map(async (list) => ({ ...list, cards: await getCards(list.id) })),
-      )
-      set({ board, lists: withCards })
+      const [{ lists, ...board }, members] = await Promise.all([getBoard(boardId), getBoardMembers(boardId)])
+      set({ board, lists, members })
     } finally {
       set({ isLoading: false })
     }
@@ -75,39 +94,140 @@ export const useBoardStore = create<BoardState>((set, get) => ({
     if (!board) return
 
     const position = lists.length ? lists[lists.length - 1].position + POSITION_GAP : POSITION_GAP
-    const list = await createList(board.id, name, position)
-    set({ lists: [...get().lists, { ...list, cards: [] }] })
+    const draft: ListWithCards = {
+      id: draftId(),
+      name,
+      position,
+      board_id: board.id,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      cards: [],
+    }
+
+    set({ lists: [...lists, draft] })
+
+    try {
+      const created = await createList(board.id, name, position)
+      set({ lists: get().lists.map((l) => (l.id === draft.id ? { ...created, cards: l.cards } : l)) })
+    } catch (err) {
+      set({ lists: get().lists.filter((l) => l.id !== draft.id) })
+      throw err
+    }
   },
 
   renameList: async (listId, name) => {
-    const updated = await updateList(listId, { name })
-    set({ lists: get().lists.map((l) => (l.id === listId ? { ...l, name: updated.name } : l)) })
+    const before = get().lists
+    set({ lists: before.map((l) => (l.id === listId ? { ...l, name } : l)) })
+
+    try {
+      await updateList(listId, { name })
+    } catch (err) {
+      set({ lists: before })
+      throw err
+    }
   },
 
   removeList: async (listId) => {
-    await deleteList(listId)
-    set({ lists: get().lists.filter((l) => l.id !== listId) })
+    const before = get().lists
+    set({ lists: before.filter((l) => l.id !== listId) })
+
+    try {
+      await deleteList(listId)
+    } catch (err) {
+      set({ lists: before })
+      throw err
+    }
   },
 
-  addCard: async (listId, title) => {
+  moveList: async (listId, beforeListId) => {
+    const lists = get().lists
+    const list = lists.find((l) => l.id === listId)
+    if (!list) return
+
+    const others = lists.filter((l) => l.id !== listId)
+    const { index, position } = slotFor(others, beforeListId)
+    if (list.position === position) return
+
+    const reordered = [...others]
+    reordered.splice(index, 0, { ...list, position })
+    set({ lists: reordered })
+
+    try {
+      await updateList(listId, { position })
+    } catch (err) {
+      set({ lists })
+      throw err
+    }
+  },
+
+  addCard: async (listId, { title, description, due_date, assigneeEmails }) => {
     const list = get().lists.find((l) => l.id === listId)
     if (!list) return
 
     const position = list.cards.length ? list.cards[list.cards.length - 1].position + POSITION_GAP : POSITION_GAP
-    const card = await createCard({ list_id: listId, title, position })
-    set({
-      lists: get().lists.map((l) => (l.id === listId ? { ...l, cards: [...l.cards, card] } : l)),
-    })
+    const draft: Card = {
+      id: draftId(),
+      title,
+      description: description ?? null,
+      position,
+      list_id: listId,
+      due_date: due_date ?? null,
+      created_by: 0,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }
+
+    const settleDraft = (saved: Card | null) =>
+      get().lists.map((l) => ({
+        ...l,
+        cards: saved ? l.cards.map((c) => (c.id === draft.id ? saved : c)) : l.cards.filter((c) => c.id !== draft.id),
+      }))
+
+    set({ lists: get().lists.map((l) => (l.id === listId ? { ...l, cards: [...l.cards, draft] } : l)) })
+
+    let created: Card
+    try {
+      created = await createCard({
+        list_id: listId,
+        title,
+        position,
+        ...(description && { description }),
+        ...(due_date && { due_date }),
+      })
+      set({ lists: settleDraft(created) })
+    } catch (err) {
+      set({ lists: settleDraft(null) })
+      throw err
+    }
+
+    // Assignment needs the id the server just issued, so it can only run now.
+    // The card itself is saved by this point — a failure here must not remove it.
+    if (assigneeEmails?.length) {
+      await Promise.all(assigneeEmails.map((email) => assignCardMember(created.id, email)))
+    }
   },
 
   editCard: async (cardId, patch) => {
-    const updated = await updateCard(cardId, patch)
+    const before = get().lists
     set({
-      lists: get().lists.map((l) => ({
+      lists: before.map((l) => ({
         ...l,
-        cards: l.cards.map((c) => (c.id === cardId ? updated : c)),
+        cards: l.cards.map((c) => (c.id === cardId ? { ...c, ...patch } : c)),
       })),
     })
+
+    try {
+      const updated = await updateCard(cardId, patch)
+      set({
+        lists: get().lists.map((l) => ({
+          ...l,
+          cards: l.cards.map((c) => (c.id === cardId ? updated : c)),
+        })),
+      })
+    } catch (err) {
+      set({ lists: before })
+      throw err
+    }
   },
 
   moveCard: async (cardId, toListId, beforeCardId) => {
@@ -117,20 +237,17 @@ export const useBoardStore = create<BoardState>((set, get) => ({
     const to = lists.find((l) => l.id === toListId)
     if (!from || !card || !to) return
 
-    // Exclude the card itself so it can't be positioned relative to its old slot.
     const destination = to.cards.filter((c) => c.id !== cardId)
-    const position = positionForMove(destination, beforeCardId)
+    const { index, position } = slotFor(destination, beforeCardId)
     if (card.list_id === toListId && card.position === position) return
 
     const moved = { ...card, list_id: toListId, position }
 
-    // Apply locally first so the drag feels immediate, then persist.
     set({
       lists: lists.map((l) => {
         if (l.id === toListId) {
-          const index = beforeCardId === null ? destination.length : destination.findIndex((c) => c.id === beforeCardId)
           const next = [...destination]
-          next.splice(index === -1 ? destination.length : index, 0, moved)
+          next.splice(index, 0, moved)
           return { ...l, cards: next }
         }
         return { ...l, cards: l.cards.filter((c) => c.id !== cardId) }
@@ -146,9 +263,14 @@ export const useBoardStore = create<BoardState>((set, get) => ({
   },
 
   removeCard: async (cardId) => {
-    await deleteCard(cardId)
-    set({
-      lists: get().lists.map((l) => ({ ...l, cards: l.cards.filter((c) => c.id !== cardId) })),
-    })
+    const before = get().lists
+    set({ lists: before.map((l) => ({ ...l, cards: l.cards.filter((c) => c.id !== cardId) })) })
+
+    try {
+      await deleteCard(cardId)
+    } catch (err) {
+      set({ lists: before })
+      throw err
+    }
   },
 }))

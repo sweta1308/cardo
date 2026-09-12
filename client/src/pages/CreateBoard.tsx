@@ -6,19 +6,17 @@ import DashboardLayout from '../components/Dashboard/DashboardLayout'
 import OnboardingShell from '../components/Onboarding/OnboardingShell'
 import Seo from '../components/Seo'
 import { ApiError, createBoard } from '../lib/api'
-
-const BACKGROUND_OPTIONS = ['#0079BF', '#D29034', '#519839', '#B04632', '#89609E', '#CD5A91', '#4BBF6B', '#00AECC']
+import { BOARD_BACKGROUNDS } from '../lib/boardColors'
 
 const CreateBoard = () => {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const workspaceId = Number(searchParams.get('workspaceId'))
-  // Only the first-run flow sets this; every other entry point is normal use.
   const isOnboarding = searchParams.get('onboarding') === '1'
 
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
-  const [background, setBackground] = useState(BACKGROUND_OPTIONS[0])
+  const [background, setBackground] = useState(BOARD_BACKGROUNDS[0])
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   if (!workspaceId) {
@@ -87,7 +85,7 @@ const CreateBoard = () => {
           <div>
             <span className={labelClass}>Background</span>
             <div className="mt-2 flex flex-wrap gap-2">
-              {BACKGROUND_OPTIONS.map((color) => (
+              {BOARD_BACKGROUNDS.map((color) => (
                 <button
                   key={color}
                   type="button"
@@ -115,8 +113,6 @@ const CreateBoard = () => {
     </div>
   )
 
-  // Outside the first-run flow, keep the normal app shell so the user still has
-  // their nav, boards and workspace switcher.
   if (!isOnboarding) {
     return <DashboardLayout>{content}</DashboardLayout>
   }

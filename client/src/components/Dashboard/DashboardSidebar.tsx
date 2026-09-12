@@ -23,15 +23,6 @@ const NavLink = ({ to, icon, label, active }: NavLinkProps) => (
   </Link>
 )
 
-// Nav entries for features that don't exist yet — shown for structure, not clickable.
-const NavPlaceholder = ({ icon, label }: { icon: string; label: string }) => (
-  <span className={`${navItemClass} cursor-default text-white/40`} title="Coming soon">
-    <span aria-hidden="true">{icon}</span>
-    {label}
-    <span className="ml-auto rounded-full bg-white/10 px-2 py-0.5 text-[10px] uppercase tracking-wide">Soon</span>
-  </span>
-)
-
 const DashboardSidebar = () => {
   const { pathname } = useLocation()
   const workspace = useWorkspaceStore((state) => state.workspace)
@@ -49,9 +40,6 @@ const DashboardSidebar = () => {
         <NavLink to="/dashboard" icon="⌂" label="Home" active={pathname === '/dashboard'} />
         <NavLink to="/boards" icon="▦" label="Boards" active={pathname.startsWith('/boards')} />
         <NavLink to="/settings" icon="⚙" label="Settings" active={pathname === '/settings'} />
-        <NavPlaceholder icon="☑" label="My Tasks" />
-        <NavPlaceholder icon="🗓" label="Calendar" />
-        <NavPlaceholder icon="📊" label="Reports" />
       </nav>
 
       <div>

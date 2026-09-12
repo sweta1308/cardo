@@ -13,25 +13,10 @@ const greeting = () => {
   return 'Good evening'
 }
 
-interface StatCardProps {
-  label: string
-  value: string
-  hint?: string
-  pending?: boolean
-}
-
-const StatCard = ({ label, value, hint, pending }: StatCardProps) => (
+const StatCard = ({ label, value }: { label: string; value: string }) => (
   <div className="rounded-xl border border-gray-200 bg-white p-4">
-    <p className="flex items-center gap-2 text-xs font-medium text-gray-500">
-      {label}
-      {pending && (
-        <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] uppercase tracking-wide text-gray-400">
-          Soon
-        </span>
-      )}
-    </p>
-    <p className={`mt-2 text-2xl font-bold ${pending ? 'text-gray-300' : 'text-gray-900'}`}>{value}</p>
-    {hint && <p className="mt-1 text-xs text-gray-400">{hint}</p>}
+    <p className="text-xs font-medium text-gray-500">{label}</p>
+    <p className="mt-2 text-2xl font-bold text-gray-900">{value}</p>
   </div>
 )
 
@@ -79,8 +64,8 @@ const Dashboard = () => {
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Active Boards" value={count(boards.length)} />
         <StatCard label="Members" value={count(members.length)} />
-        <StatCard label="Tasks" value="—" hint="Needs lists & cards" pending />
-        <StatCard label="Completed" value="—" hint="Needs lists & cards" pending />
+        <StatCard label="Cards" value={count(boards.reduce((total, b) => total + (b.card_count ?? 0), 0))} />
+        <StatCard label="Lists" value={count(boards.reduce((total, b) => total + (b.list_count ?? 0), 0))} />
       </div>
 
       <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_20rem]">

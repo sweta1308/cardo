@@ -14,8 +14,6 @@ const CreateWorkspace = () => {
   const navigate = useNavigate()
   const user = useAuthStore((state) => state.user)
   const setWorkspace = useWorkspaceStore((state) => state.setWorkspace)
-  // The active workspace is persisted, so this is reliable on first render —
-  // unlike the workspaces list, which is fetched after mount.
   const hasWorkspace = useWorkspaceStore((state) => Boolean(state.workspace))
   const firstName = user?.name.split(' ')[0] ?? 'there'
 
@@ -117,7 +115,6 @@ const CreateWorkspace = () => {
     </div>
   )
 
-  // Creating an additional workspace isn't onboarding — keep the normal app shell.
   if (hasWorkspace) {
     return <DashboardLayout>{content}</DashboardLayout>
   }

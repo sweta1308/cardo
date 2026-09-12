@@ -9,6 +9,7 @@ import { useWorkspaceStore } from '../../store/workspaceStore'
 const DashboardLayout = ({ children }: { children: ReactNode }) => {
   const workspace = useWorkspaceStore((state) => state.workspace)
   const fetchMembers = useWorkspaceStore((state) => state.fetchMembers)
+  const resolveWorkspace = useWorkspaceStore((state) => state.resolveWorkspace)
   const fetchBoards = useBoardsStore((state) => state.fetchBoards)
 
   const [error, setError] = useState<string | null>(null)
@@ -19,9 +20,14 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
 
     setError(null)
     Promise.all([fetchBoards(workspace.id), fetchMembers(workspace.id)]).catch((err: unknown) => {
+      if (err instanceof ApiError && err.status === 404) {
+        resolveWorkspace().catch(() => setError("Couldn't reach the server."))
+        return
+      }
+
       setError(err instanceof ApiError && err.status ? err.message : "Couldn't reach the server.")
     })
-  }, [workspace, fetchBoards, fetchMembers, retryCount])
+  }, [workspace, fetchBoards, fetchMembers, resolveWorkspace, retryCount])
 
   return (
     <div className="grid min-h-screen bg-gray-50 md:grid-cols-[16rem_1fr]">

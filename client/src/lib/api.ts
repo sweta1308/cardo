@@ -37,9 +37,15 @@ apiClient.interceptors.request.use((config) => {
 
 apiClient.interceptors.response.use(
   (response) => response,
-  (error: AxiosError<{ error?: string }>) => {
-    const message = error.response?.data?.error ?? 'Something went wrong'
+  (error: AxiosError<{ error?: string; message?: string }>) => {
+    const data = error.response?.data
+    const message = data?.error ?? data?.message ?? 'Something went wrong'
     const status = error.response?.status ?? 0
+
+    if (status === 403) {
+      useAuthStore.getState().logout()
+    }
+
     return Promise.reject(new ApiError(message, status))
   },
 )
@@ -82,15 +88,12 @@ export interface Board {
 
 export interface BoardWithRole extends Board {
   role: Role
+  list_count?: number
+  card_count?: number
 }
 
 export async function createWorkspace(name: string, description: string) {
   const { data } = await apiClient.post<Workspace>('/workspaces', { name, description })
-  return data
-}
-
-export async function getWorkspace(workspaceId: number) {
-  const { data } = await apiClient.get<WorkspaceWithRole>(`/workspaces/${workspaceId}`)
   return data
 }
 
@@ -130,8 +133,12 @@ export async function getBoards(workspaceId: number) {
   return data
 }
 
+export interface BoardDetail extends BoardWithRole {
+  lists: (List & { cards: Card[] })[]
+}
+
 export async function getBoard(boardId: number) {
-  const { data } = await apiClient.get<BoardWithRole>(`/boards/${boardId}`)
+  const { data } = await apiClient.get<BoardDetail>(`/boards/${boardId}`)
   return data
 }
 
@@ -144,6 +151,47 @@ export async function deleteBoard(boardId: number) {
   await apiClient.delete(`/boards/${boardId}`)
 }
 
+export interface BoardMember {
+  id: number
+  name: string
+  email: string
+  role: Role
+}
+
+export async function getBoardMembers(boardId: number) {
+  const { data } = await apiClient.get<BoardMember[]>(`/boards/${boardId}/members`)
+  return data
+}
+
+export async function addBoardMember(boardId: number, email: string, role?: 'Admin' | 'Member') {
+  const { data } = await apiClient.post<BoardMember>(`/boards/${boardId}/members`, { email, role })
+  return data
+}
+
+export async function removeBoardMember(boardId: number, userId: number) {
+  await apiClient.delete(`/boards/${boardId}/members/${userId}`)
+}
+
+export interface CardAssignee {
+  id: number
+  name: string
+  email: string
+}
+
+export async function getCardMembers(cardId: number) {
+  const { data } = await apiClient.get<CardAssignee[]>(`/cards/${cardId}/members`)
+  return data
+}
+
+export async function assignCardMember(cardId: number, email: string) {
+  const { data } = await apiClient.post<CardAssignee>(`/cards/${cardId}/members`, { email })
+  return data
+}
+
+export async function unassignCardMember(cardId: number, userId: number) {
+  await apiClient.delete(`/cards/${cardId}/members/${userId}`)
+}
+
 export interface List {
   id: number
   name: string
@@ -151,11 +199,6 @@ export interface List {
   board_id: number
   created_at: string
   updated_at: string
-}
-
-export async function getLists(boardId: number) {
-  const { data } = await apiClient.get<List[]>('/lists', { params: { board_id: boardId } })
-  return data
 }
 
 export async function createList(boardId: number, name: string, position: number) {
@@ -184,12 +227,13 @@ export interface Card {
   updated_at: string
 }
 
-export async function getCards(listId: number) {
-  const { data } = await apiClient.get<Card[]>('/cards', { params: { list_id: listId } })
-  return data
-}
-
-export async function createCard(payload: { list_id: number; title: string; position: number; description?: string }) {
+export async function createCard(payload: {
+  list_id: number
+  title: string
+  position: number
+  description?: string
+  due_date?: string
+}) {
   const { data } = await apiClient.post<Card>('/cards', payload)
   return data
 }

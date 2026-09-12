@@ -1,16 +1,19 @@
 import { useState, type DragEvent, type FormEvent } from 'react'
 import type { Card } from '../../lib/api'
-import type { ListWithCards } from '../../store/boardStore'
+import { isDraft, type ListWithCards } from '../../store/boardStore'
 
 interface ListColumnProps {
   list: ListWithCards
-  onAddCard: (listId: number, title: string) => void
+  onAddCard: (listId: number) => void
   onRenameList: (listId: number, name: string) => void
   onDeleteList: (listId: number) => void
   onOpenCard: (card: Card) => void
-  onDropCard: (toListId: number, beforeCardId: number | null) => void
+  onDropCard: (cardId: number, toListId: number, beforeCardId: number | null) => void
+  onDropList: (listId: number, beforeListId: number | null) => void
   draggingCardId: number | null
   setDraggingCardId: (id: number | null) => void
+  draggingListId: number | null
+  setDraggingListId: (id: number | null) => void
 }
 
 const ListColumn = ({
@@ -20,22 +23,15 @@ const ListColumn = ({
   onDeleteList,
   onOpenCard,
   onDropCard,
+  onDropList,
   draggingCardId,
   setDraggingCardId,
+  draggingListId,
+  setDraggingListId,
 }: ListColumnProps) => {
-  const [isAdding, setIsAdding] = useState(false)
-  const [title, setTitle] = useState('')
   const [isRenaming, setIsRenaming] = useState(false)
   const [name, setName] = useState(list.name)
   const [dropTarget, setDropTarget] = useState<number | 'end' | null>(null)
-
-  const handleAdd = (e: FormEvent) => {
-    e.preventDefault()
-    if (!title.trim()) return
-    onAddCard(list.id, title.trim())
-    setTitle('')
-    setIsAdding(false)
-  }
 
   const handleRename = (e: FormEvent) => {
     e.preventDefault()
@@ -45,26 +41,50 @@ const ListColumn = ({
   }
 
   const allowDrop = (e: DragEvent) => {
-    if (draggingCardId === null) return
+    if (draggingCardId === null && draggingListId === null) return
     e.preventDefault()
   }
 
   const handleDrop = (e: DragEvent, beforeCardId: number | null) => {
-    if (draggingCardId === null) return
+    if (draggingCardId === null && draggingListId === null) return
     e.preventDefault()
     e.stopPropagation()
     setDropTarget(null)
-    onDropCard(list.id, beforeCardId)
+
+    if (draggingListId !== null) {
+      const listId = draggingListId
+      setDraggingListId(null)
+      if (listId !== list.id) onDropList(listId, list.id)
+      return
+    }
+
+    const cardId = draggingCardId
+    setDraggingCardId(null)
+    if (cardId !== null) onDropCard(cardId, list.id, beforeCardId)
   }
+
+  const isDraggedList = draggingListId === list.id
+  const isSaving = isDraft(list.id)
 
   return (
     <div
-      className="flex w-72 shrink-0 flex-col rounded-xl bg-gray-100 p-3"
+      className={`flex w-72 shrink-0 flex-col rounded-xl bg-gray-100 p-3 ${isDraggedList ? 'opacity-40' : ''} ${
+        draggingListId !== null && !isDraggedList ? 'border-l-2 border-brand' : ''
+      }`}
       onDragOver={allowDrop}
       onDrop={(e) => handleDrop(e, null)}
       onDragLeave={() => setDropTarget(null)}
     >
-      <div className="flex items-center gap-2">
+      <div
+        className="flex items-center gap-2"
+        draggable={!isRenaming && !isSaving}
+        onDragStart={(e) => {
+          e.stopPropagation()
+          setDraggingListId(list.id)
+        }}
+        onDragEnd={() => setDraggingListId(null)}
+        title="Drag to reorder list"
+      >
         {isRenaming ? (
           <form onSubmit={handleRename} className="flex-1">
             <input
@@ -86,13 +106,14 @@ const ListColumn = ({
           </button>
         )}
 
-        <span className="shrink-0 text-xs text-gray-400">{list.cards.length}</span>
+        <span className="shrink-0 text-xs text-gray-400">{isSaving ? 'Saving…' : list.cards.length}</span>
 
         <button
           type="button"
           onClick={() => onDeleteList(list.id)}
+          disabled={isSaving}
           aria-label={`Delete list ${list.name}`}
-          className="shrink-0 cursor-pointer px-1 text-gray-400 hover:text-red-600"
+          className="shrink-0 cursor-pointer px-1 text-gray-400 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-40"
         >
           ×
         </button>
@@ -111,8 +132,12 @@ const ListColumn = ({
           >
             <button
               type="button"
-              draggable
-              onDragStart={() => setDraggingCardId(card.id)}
+              draggable={!isDraft(card.id)}
+              disabled={isDraft(card.id)}
+              onDragStart={(e) => {
+                e.stopPropagation()
+                setDraggingCardId(card.id)
+              }}
               onDragEnd={() => {
                 setDraggingCardId(null)
                 setDropTarget(null)
@@ -120,54 +145,29 @@ const ListColumn = ({
               onClick={() => onOpenCard(card)}
               className={`w-full cursor-pointer rounded-lg bg-white p-3 text-left shadow-sm transition-shadow hover:shadow ${
                 draggingCardId === card.id ? 'opacity-40' : ''
-              }`}
+              } ${isDraft(card.id) ? 'cursor-progress opacity-60' : ''}`}
             >
               <p className="text-sm text-gray-800">{card.title}</p>
-              {card.due_date && (
-                <p className="mt-1 text-xs text-gray-400">Due {new Date(card.due_date).toLocaleDateString()}</p>
+              {isDraft(card.id) ? (
+                <p className="mt-1 text-xs text-gray-400">Saving…</p>
+              ) : (
+                card.due_date && (
+                  <p className="mt-1 text-xs text-gray-400">Due {new Date(card.due_date).toLocaleDateString()}</p>
+                )
               )}
             </button>
           </div>
         ))}
       </div>
 
-      {isAdding ? (
-        <form onSubmit={handleAdd} className="mt-2">
-          <input
-            autoFocus
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Card title"
-            className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-brand"
-          />
-          <div className="mt-2 flex gap-2">
-            <button
-              type="submit"
-              className="cursor-pointer rounded-lg bg-brand-dark px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand"
-            >
-              Add card
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setIsAdding(false)
-                setTitle('')
-              }}
-              className="cursor-pointer px-2 py-1.5 text-xs text-gray-500 hover:text-gray-700"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
-      ) : (
-        <button
-          type="button"
-          onClick={() => setIsAdding(true)}
-          className="mt-2 cursor-pointer rounded-lg px-2 py-1.5 text-left text-sm text-gray-500 hover:bg-gray-200 hover:text-gray-700"
-        >
-          + Add a card
-        </button>
-      )}
+      <button
+        type="button"
+        onClick={() => onAddCard(list.id)}
+        disabled={isSaving}
+        className="mt-2 cursor-pointer rounded-lg px-2 py-1.5 text-left text-sm text-gray-500 hover:bg-gray-200 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        + Add a card
+      </button>
     </div>
   )
 }

@@ -52,10 +52,23 @@ boardRouter.get("/", authMiddleware, async (req: Request, res: Response) => {
       user_id: req.userId!,
       ...(workspaceId && { board: { workspace_id: workspaceId } }),
     },
-    select: { role: true, board: true },
+    select: {
+      role: true,
+      // Counting through the relation avoids loading any card rows.
+      board: { include: { lists: { select: { _count: { select: { cards: true } } } } } },
+    },
   });
 
-  const boards = memberships.map(({ board, role }) => ({ ...board, role }));
+  const boards = memberships.map(({ board, role }) => {
+    const { lists, ...rest } = board;
+
+    return {
+      ...rest,
+      role,
+      list_count: lists.length,
+      card_count: lists.reduce((total, list) => total + list._count.cards, 0),
+    };
+  });
 
   res.json(boards);
 });
@@ -63,9 +76,26 @@ boardRouter.get("/", authMiddleware, async (req: Request, res: Response) => {
 boardRouter.get("/:boardId", authMiddleware, async (req: Request<{ boardId: string }>, res: Response) => {
   const boardId = Number(req.params.boardId);
 
+  if (!Number.isInteger(boardId)) {
+    res.status(400).json({ error: "boardId must be a number" });
+    return;
+  }
+
   const membership = await prisma.boardMember.findUnique({
     where: { board_id_user_id: { board_id: boardId, user_id: req.userId! } },
-    select: { role: true, board: true },
+    select: {
+      role: true,
+      // Lists and cards ship with the board so opening it is a single request
+      // rather than one request per list.
+      board: {
+        include: {
+          lists: {
+            orderBy: { position: "asc" },
+            include: { cards: { orderBy: { position: "asc" } } },
+          },
+        },
+      },
+    },
   });
 
   if (!membership) {
