@@ -40,10 +40,14 @@ const Dashboard = () => {
   const workspace = useWorkspaceStore((state) => state.workspace)
   const members = useWorkspaceStore((state) => state.members)
   const boards = useBoardsStore((state) => state.boards)
+  const isLoading = useBoardsStore((state) => state.isLoading)
 
   if (!workspace) {
     return <Navigate to="/onboarding" replace />
   }
+
+  const pendingData = isLoading && boards.length === 0
+  const count = (value: number) => (pendingData ? '…' : String(value))
 
   const firstName = user?.name.split(' ')[0] ?? 'there'
   const memberName = (id: number) => (id === user?.id ? 'You' : (members.find((m) => m.id === id)?.name ?? 'Someone'))
@@ -73,8 +77,8 @@ const Dashboard = () => {
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Active Boards" value={String(boards.length)} />
-        <StatCard label="Members" value={String(members.length)} />
+        <StatCard label="Active Boards" value={count(boards.length)} />
+        <StatCard label="Members" value={count(members.length)} />
         <StatCard label="Tasks" value="—" hint="Needs lists & cards" pending />
         <StatCard label="Completed" value="—" hint="Needs lists & cards" pending />
       </div>
@@ -84,7 +88,9 @@ const Dashboard = () => {
           <h2 className="text-sm font-semibold text-gray-900">Recent Activity</h2>
 
           <div className="mt-3 rounded-xl border border-gray-200 bg-white">
-            {activity.length === 0 ? (
+            {pendingData ? (
+              <p className="p-4 text-sm text-gray-400">Loading…</p>
+            ) : activity.length === 0 ? (
               <p className="p-4 text-sm text-gray-400">Nothing here yet.</p>
             ) : (
               <ul className="divide-y divide-gray-100">
