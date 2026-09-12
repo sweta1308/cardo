@@ -1,6 +1,10 @@
 import axios, { AxiosError } from 'axios'
 import { useAuthStore } from '../store/authStore'
 
+if (import.meta.env.PROD && !import.meta.env.VITE_API_URL) {
+  console.error('VITE_API_URL is not set — the app is falling back to http://localhost:3000/api and API calls will fail.')
+}
+
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api'
 
 export interface AuthUser {

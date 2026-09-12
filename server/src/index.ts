@@ -7,10 +7,38 @@ import { boardRouter } from "./routes/board.route.js";
 import { listRouter } from "./routes/list.route.js";
 import { cardRouter } from "./routes/card.route.js";
 
+for (const key of ["DATABASE_URL", "JWT_SECRET"]) {
+  if (!process.env[key]) {
+    console.error(`Missing required environment variable: ${key}`);
+    process.exit(1);
+  }
+}
+
 const app = express();
 
-app.use(cors());
+const allowedOrigins = (process.env["CLIENT_ORIGIN"] ?? "http://localhost:5173")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error(`Origin ${origin} is not allowed by CORS`));
+    },
+  }),
+);
+
 app.use(express.json());
+
+app.get("/health", (_req, res) => {
+  res.json({ status: "ok", uptime: process.uptime() });
+});
 
 app.use("/api", authRouter);
 
@@ -24,6 +52,7 @@ app.use("/api/cards", cardRouter);
 
 const PORT = process.env["PORT"] ? Number(process.env["PORT"]) : 3000;
 
-app.listen(PORT, () => {
-  console.log(`Server listening on http://localhost:${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server listening on port ${PORT}`);
+  console.log(`Allowed origins: ${allowedOrigins.join(", ")}`);
 });
