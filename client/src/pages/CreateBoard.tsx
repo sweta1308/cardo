@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { inputClass, labelClass } from '../components/Auth/formStyles'
+import DashboardLayout from '../components/Dashboard/DashboardLayout'
 import OnboardingShell from '../components/Onboarding/OnboardingShell'
 import Seo from '../components/Seo'
 import { ApiError, createBoard } from '../lib/api'
@@ -12,6 +13,8 @@ const CreateBoard = () => {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const workspaceId = Number(searchParams.get('workspaceId'))
+  // Only the first-run flow sets this; every other entry point is normal use.
+  const isOnboarding = searchParams.get('onboarding') === '1'
 
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
@@ -37,8 +40,8 @@ const CreateBoard = () => {
     }
   }
 
-  return (
-    <OnboardingShell stepLabel="Create your first board">
+  const content = (
+    <div className="flex w-full flex-col items-center">
       <Seo title="Create your board" description="Create a board to start organizing your tasks." />
 
       <span className="flex h-12 w-12 items-center justify-center rounded-full bg-brand/10 text-2xl" aria-hidden="true">
@@ -109,8 +112,16 @@ const CreateBoard = () => {
           </button>
         </form>
       </div>
-    </OnboardingShell>
+    </div>
   )
+
+  // Outside the first-run flow, keep the normal app shell so the user still has
+  // their nav, boards and workspace switcher.
+  if (!isOnboarding) {
+    return <DashboardLayout>{content}</DashboardLayout>
+  }
+
+  return <OnboardingShell stepLabel="Create your first board">{content}</OnboardingShell>
 }
 
 export default CreateBoard

@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
 import logoWhite from '../../assets/logo-white.webp'
+import WorkspaceSwitcher from './WorkspaceSwitcher'
 import { useBoardsStore } from '../../store/boardsStore'
 import { useWorkspaceStore } from '../../store/workspaceStore'
 
@@ -34,7 +35,6 @@ const NavPlaceholder = ({ icon, label }: { icon: string; label: string }) => (
 const DashboardSidebar = () => {
   const { pathname } = useLocation()
   const workspace = useWorkspaceStore((state) => state.workspace)
-  const members = useWorkspaceStore((state) => state.members)
   const boards = useBoardsStore((state) => state.boards)
 
   return (
@@ -43,19 +43,7 @@ const DashboardSidebar = () => {
         <img src={logoWhite} alt="cardo" className="h-12 w-auto" />
       </Link>
 
-      <div className="flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2">
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-brand text-xs font-bold text-white">
-          {workspace?.name.charAt(0).toUpperCase() ?? 'W'}
-        </span>
-        <div className="min-w-0">
-          <p className="truncate text-sm font-medium text-white">{workspace?.name ?? 'Workspace'}</p>
-          {members.length > 0 && (
-            <p className="text-xs text-white/50">
-              {members.length} {members.length === 1 ? 'member' : 'members'}
-            </p>
-          )}
-        </div>
-      </div>
+      <WorkspaceSwitcher />
 
       <nav className="flex flex-col gap-1">
         <NavLink to="/dashboard" icon="⌂" label="Home" active={pathname === '/dashboard'} />

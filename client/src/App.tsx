@@ -24,15 +24,16 @@ function App() {
   const isResolved = useWorkspaceStore((state) => state.isResolved)
   const resolveWorkspace = useWorkspaceStore((state) => state.resolveWorkspace)
 
-  const needsWorkspace = isLoggedIn && !workspace && !isResolved
-
+  // Always resolve once per session: it populates the workspace switcher and
+  // re-checks that the persisted workspace still exists.
   useEffect(() => {
-    if (needsWorkspace) resolveWorkspace()
-  }, [needsWorkspace, resolveWorkspace])
+    if (isLoggedIn && !isResolved) resolveWorkspace()
+  }, [isLoggedIn, isResolved, resolveWorkspace])
 
   // Routing depends on whether a workspace exists, so hold off until we know —
   // otherwise a returning user is sent to onboarding before the lookup lands.
-  if (needsWorkspace) {
+  // A persisted workspace is enough to route on, so only block without one.
+  if (isLoggedIn && !workspace && !isResolved) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50">
         <p className="text-sm text-gray-500">Loading…</p>

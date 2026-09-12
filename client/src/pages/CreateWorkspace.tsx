@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import onboardingIllustration from '../assets/onboarding-illustration.svg'
 import { inputClass, labelClass } from '../components/Auth/formStyles'
+import DashboardLayout from '../components/Dashboard/DashboardLayout'
 import OnboardingShell from '../components/Onboarding/OnboardingShell'
 import Seo from '../components/Seo'
 import { ApiError, createWorkspace } from '../lib/api'
@@ -13,6 +14,9 @@ const CreateWorkspace = () => {
   const navigate = useNavigate()
   const user = useAuthStore((state) => state.user)
   const setWorkspace = useWorkspaceStore((state) => state.setWorkspace)
+  // The active workspace is persisted, so this is reliable on first render —
+  // unlike the workspaces list, which is fetched after mount.
+  const hasWorkspace = useWorkspaceStore((state) => Boolean(state.workspace))
   const firstName = user?.name.split(' ')[0] ?? 'there'
 
   const [name, setName] = useState('')
@@ -27,7 +31,7 @@ const CreateWorkspace = () => {
       const workspace = await createWorkspace(name, description)
       setWorkspace(workspace)
       toast.success('Workspace created')
-      navigate(`/boards/new?workspaceId=${workspace.id}`)
+      navigate(`/boards/new?workspaceId=${workspace.id}${hasWorkspace ? '' : '&onboarding=1'}`)
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : 'Something went wrong')
     } finally {
@@ -35,23 +39,29 @@ const CreateWorkspace = () => {
     }
   }
 
-  return (
-    <OnboardingShell stepLabel="Create your first workspace">
-      <Seo title="Create your workspace" description="Create your first workspace to start organizing your projects." />
+  const content = (
+    <div className="flex w-full flex-col items-center">
+      <Seo title="Create your workspace" description="Create a workspace to start organizing your projects." />
 
       <span className="flex h-12 w-12 items-center justify-center rounded-full bg-brand/10 text-2xl" aria-hidden="true">
-        👋
+        {hasWorkspace ? '🏢' : '👋'}
       </span>
-      <h1 className="mt-4 text-2xl font-bold text-gray-900 sm:text-3xl">Welcome, {firstName}!</h1>
+      <h1 className="mt-4 text-2xl font-bold text-gray-900 sm:text-3xl">
+        {hasWorkspace ? 'Create a workspace' : `Welcome, ${firstName}!`}
+      </h1>
       <p className="mt-2 text-center text-sm text-gray-500 sm:text-base">
-        Let's create your first workspace.
+        {hasWorkspace ? 'Set up another space for a different team or project.' : "Let's create your first workspace."}
         <br />
         You'll be ready to organize your projects in no time.
       </p>
 
-      <img src={onboardingIllustration} alt="Onboarding illustration" className="w-full max-w-md" />
+      {!hasWorkspace && (
+        <img src={onboardingIllustration} alt="Onboarding illustration" className="w-full max-w-md" />
+      )}
 
-      <div className="relative z-10 -mt-24 w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+      <div
+        className={`relative z-10 w-full max-w-md rounded-2xl bg-white p-6 shadow-xl ${hasWorkspace ? 'mt-8' : '-mt-24'}`}
+      >
         <div className="flex items-start gap-3">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand/10 text-lg" aria-hidden="true">
             🏢
@@ -104,8 +114,15 @@ const CreateWorkspace = () => {
           </button>
         </form>
       </div>
-    </OnboardingShell>
+    </div>
   )
+
+  // Creating an additional workspace isn't onboarding — keep the normal app shell.
+  if (hasWorkspace) {
+    return <DashboardLayout>{content}</DashboardLayout>
+  }
+
+  return <OnboardingShell stepLabel="Create your first workspace">{content}</OnboardingShell>
 }
 
 export default CreateWorkspace
