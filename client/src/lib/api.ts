@@ -134,3 +134,96 @@ export async function getBoard(boardId: number) {
   const { data } = await apiClient.get<BoardWithRole>(`/boards/${boardId}`)
   return data
 }
+
+export async function updateBoard(boardId: number, patch: { name?: string; description?: string; background?: string }) {
+  const { data } = await apiClient.patch<Board>(`/boards/${boardId}`, patch)
+  return data
+}
+
+export async function deleteBoard(boardId: number) {
+  await apiClient.delete(`/boards/${boardId}`)
+}
+
+export interface List {
+  id: number
+  name: string
+  position: number
+  board_id: number
+  created_at: string
+  updated_at: string
+}
+
+export async function getLists(boardId: number) {
+  const { data } = await apiClient.get<List[]>('/lists', { params: { board_id: boardId } })
+  return data
+}
+
+export async function createList(boardId: number, name: string, position: number) {
+  const { data } = await apiClient.post<List>('/lists', { board_id: boardId, name, position })
+  return data
+}
+
+export async function updateList(listId: number, patch: { name?: string; position?: number }) {
+  const { data } = await apiClient.patch<List>(`/lists/${listId}`, patch)
+  return data
+}
+
+export async function deleteList(listId: number) {
+  await apiClient.delete(`/lists/${listId}`)
+}
+
+export interface Card {
+  id: number
+  title: string
+  description: string | null
+  position: number
+  list_id: number
+  due_date: string | null
+  created_by: number
+  created_at: string
+  updated_at: string
+}
+
+export async function getCards(listId: number) {
+  const { data } = await apiClient.get<Card[]>('/cards', { params: { list_id: listId } })
+  return data
+}
+
+export async function createCard(payload: { list_id: number; title: string; position: number; description?: string }) {
+  const { data } = await apiClient.post<Card>('/cards', payload)
+  return data
+}
+
+export async function updateCard(
+  cardId: number,
+  patch: { title?: string; description?: string; position?: number; due_date?: string | null; list_id?: number },
+) {
+  const { data } = await apiClient.patch<Card>(`/cards/${cardId}`, patch)
+  return data
+}
+
+export async function deleteCard(cardId: number) {
+  await apiClient.delete(`/cards/${cardId}`)
+}
+
+export async function updateWorkspace(workspaceId: number, patch: { name?: string; description?: string }) {
+  const { data } = await apiClient.patch<Workspace>(`/workspaces/${workspaceId}`, patch)
+  return data
+}
+
+export async function deleteWorkspace(workspaceId: number) {
+  await apiClient.delete(`/workspaces/${workspaceId}`)
+}
+
+export async function addWorkspaceMember(workspaceId: number, email: string, role?: 'Admin' | 'Member') {
+  const { data } = await apiClient.post<WorkspaceMember>(`/workspaces/${workspaceId}/members`, { email, role })
+  return data
+}
+
+export async function removeWorkspaceMember(workspaceId: number, userId: number) {
+  await apiClient.delete(`/workspaces/${workspaceId}/members/${userId}`)
+}
+
+export async function logout() {
+  await apiClient.post('/logout')
+}

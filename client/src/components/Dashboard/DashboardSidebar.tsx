@@ -48,6 +48,7 @@ const DashboardSidebar = () => {
       <nav className="flex flex-col gap-1">
         <NavLink to="/dashboard" icon="⌂" label="Home" active={pathname === '/dashboard'} />
         <NavLink to="/boards" icon="▦" label="Boards" active={pathname.startsWith('/boards')} />
+        <NavLink to="/settings" icon="⚙" label="Settings" active={pathname === '/settings'} />
         <NavPlaceholder icon="☑" label="My Tasks" />
         <NavPlaceholder icon="🗓" label="Calendar" />
         <NavPlaceholder icon="📊" label="Reports" />

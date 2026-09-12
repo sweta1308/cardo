@@ -8,6 +8,7 @@ import Register from './pages/Register'
 import CreateWorkspace from './pages/CreateWorkspace'
 import CreateBoard from './pages/CreateBoard'
 import Dashboard from './pages/Dashboard'
+import WorkspaceSettings from './pages/WorkspaceSettings'
 import Boards from './pages/Boards'
 import BoardDetail from './pages/BoardDetail'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -84,6 +85,14 @@ function App() {
         element={
           <ProtectedRoute>
             <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/settings"
+        element={
+          <ProtectedRoute>
+            <WorkspaceSettings />
           </ProtectedRoute>
         }
       />
