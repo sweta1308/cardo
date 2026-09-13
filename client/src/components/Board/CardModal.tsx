@@ -10,6 +10,8 @@ import {
   type CardAssignee,
 } from '../../lib/api'
 import { inputClass, labelClass } from '../Auth/formStyles'
+import Avatar from '../ui/Avatar'
+import Button from '../ui/Button'
 
 export interface CardDraft {
   title: string
@@ -89,26 +91,24 @@ const CardModal = ({ card, boardMembers, onClose, onSubmit, onDelete }: CardModa
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-      role="dialog"
-      aria-modal="true"
-      onClick={onClose}
-    >
-      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-start justify-between gap-4">
-          <h2 className="text-sm font-semibold text-gray-900">{isEditing ? 'Card details' : 'Add a card'}</h2>
+    <div className="fixed inset-0 z-50 flex justify-end bg-black/40" role="dialog" aria-modal="true" onClick={onClose}>
+      <div
+        className="flex h-full w-full max-w-md flex-col overflow-y-auto bg-white shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-4 border-b border-gray-100 px-6 py-4">
+          <h2 className="text-base font-semibold text-gray-900">{isEditing ? 'Card details' : 'Add a card'}</h2>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="cursor-pointer text-gray-400 hover:text-gray-600"
+            className="cursor-pointer text-xl leading-none text-gray-400 hover:text-gray-600"
           >
             ×
           </button>
         </div>
 
-        <form className="mt-4 space-y-4" onSubmit={handleSubmit}>
+        <form className="space-y-4 px-6 py-5" onSubmit={handleSubmit}>
           <div>
             <label htmlFor="card-title" className={labelClass}>
               Title
@@ -158,8 +158,9 @@ const CardModal = ({ card, boardMembers, onClose, onSubmit, onDelete }: CardModa
                   {assignees.map((assignee) => (
                     <li
                       key={assignee.id}
-                      className="flex items-center gap-1.5 rounded-full bg-brand/10 py-1 pl-2 pr-1 text-xs text-brand-dark"
+                      className="flex items-center gap-1.5 rounded-full bg-gray-100 py-1 pl-1 pr-1 text-xs text-gray-700"
                     >
+                      <Avatar name={assignee.name} size="sm" />
                       <span className="font-medium">{assignee.name}</span>
                       <button
                         type="button"
@@ -195,7 +196,7 @@ const CardModal = ({ card, boardMembers, onClose, onSubmit, onDelete }: CardModa
               )}
           </div>
 
-          <div className="flex items-center justify-between gap-3 pt-2">
+          <div className="flex items-center justify-between gap-3 border-t border-gray-100 pt-4">
             {isEditing && onDelete ? (
               <button
                 type="button"
@@ -208,13 +209,9 @@ const CardModal = ({ card, boardMembers, onClose, onSubmit, onDelete }: CardModa
               <span />
             )}
 
-            <button
-              type="submit"
-              disabled={!title.trim()}
-              className="cursor-pointer rounded-full bg-brand-dark px-4 py-2 text-sm font-semibold text-white hover:bg-brand disabled:cursor-not-allowed disabled:opacity-50"
-            >
+            <Button type="submit" disabled={!title.trim()}>
               {isEditing ? 'Save' : 'Add card'}
-            </button>
+            </Button>
           </div>
         </form>
       </div>

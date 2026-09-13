@@ -6,6 +6,7 @@ import { inputClass, labelClass } from '../components/Auth/formStyles'
 import DashboardLayout from '../components/Dashboard/DashboardLayout'
 import OnboardingShell from '../components/Onboarding/OnboardingShell'
 import Seo from '../components/Seo'
+import Button from '../components/ui/Button'
 import { ApiError, createWorkspace } from '../lib/api'
 import { useAuthStore } from '../store/authStore'
 import { useWorkspaceStore } from '../store/workspaceStore'
@@ -103,13 +104,9 @@ const CreateWorkspace = () => {
 
           <p className="text-xs text-gray-500">💡 Don't worry, you can change this later from workspace settings.</p>
 
-          <button
-            type="submit"
-            disabled={isSubmitting || !name.trim() || !description.trim()}
-            className="w-full cursor-pointer rounded-full bg-brand-dark py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand disabled:cursor-not-allowed disabled:opacity-50"
-          >
+          <Button type="submit" disabled={isSubmitting || !name.trim() || !description.trim()} className="w-full">
             {isSubmitting ? 'Creating workspace…' : 'Create workspace →'}
-          </button>
+          </Button>
         </form>
       </div>
     </div>

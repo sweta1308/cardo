@@ -2,6 +2,8 @@ import { useMemo, useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import DashboardLayout from '../components/Dashboard/DashboardLayout'
 import Seo from '../components/Seo'
+import { ButtonLink } from '../components/ui/Button'
+import Skeleton from '../components/ui/Skeleton'
 import { timeAgo } from '../lib/formatDate'
 import { useBoardsStore } from '../store/boardsStore'
 import { useWorkspaceStore } from '../store/workspaceStore'
@@ -44,16 +46,11 @@ const Boards = () => {
 
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">Boards</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Boards</h1>
           <p className="mt-1 text-sm text-gray-500">All boards in your workspace</p>
         </div>
 
-        <Link
-          to={`/boards/new?workspaceId=${workspace.id}`}
-          className="rounded-full bg-brand-dark px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand"
-        >
-          + New Board
-        </Link>
+        <ButtonLink to={`/boards/new?workspaceId=${workspace.id}`}>+ New Board</ButtonLink>
       </div>
 
       <div className="mt-6 flex flex-wrap items-center gap-3">
@@ -90,7 +87,18 @@ const Boards = () => {
       </div>
 
       {isLoading && boards.length === 0 ? (
-        <p className="mt-8 text-sm text-gray-500">Loading boards…</p>
+        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <div key={index} className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+              <Skeleton className="h-20 rounded-none" />
+              <div className="p-4">
+                <Skeleton className="h-4 w-2/3" />
+                <Skeleton className="mt-2 h-3 w-full" />
+                <Skeleton className="mt-3 h-3 w-1/2" />
+              </div>
+            </div>
+          ))}
+        </div>
       ) : visibleBoards.length === 0 && search ? (
         <p className="mt-8 text-sm text-gray-500">No boards match "{search}".</p>
       ) : isGrid ? (

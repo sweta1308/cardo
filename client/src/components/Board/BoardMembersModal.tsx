@@ -2,6 +2,8 @@ import { useState, type FormEvent } from 'react'
 import toast from 'react-hot-toast'
 import { ApiError, addBoardMember, removeBoardMember, type BoardMember } from '../../lib/api'
 import { inputClass, labelClass } from '../Auth/formStyles'
+import Button from '../ui/Button'
+import { useConfirm } from '../ui/ConfirmDialog'
 
 interface BoardMembersModalProps {
   boardId: number
@@ -22,6 +24,7 @@ const BoardMembersModal = ({
   onClose,
   onChanged,
 }: BoardMembersModalProps) => {
+  const { confirm, dialog } = useConfirm()
   const [email, setEmail] = useState('')
   const [role, setRole] = useState<'Admin' | 'Member'>('Member')
   const [isAdding, setIsAdding] = useState(false)
@@ -42,7 +45,13 @@ const BoardMembersModal = ({
   }
 
   const handleRemove = async (userId: number, name: string) => {
-    if (!window.confirm(`Remove ${name} from ${boardName}?`)) return
+    const ok = await confirm({
+      title: `Remove ${name}?`,
+      message: `They'll lose access to ${boardName}.`,
+      confirmLabel: 'Remove',
+      danger: true,
+    })
+    if (!ok) return
     try {
       await removeBoardMember(boardId, userId)
       toast.success('Member removed')
@@ -53,6 +62,8 @@ const BoardMembersModal = ({
   }
 
   return (
+    <>
+    {dialog}
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
       role="dialog"
@@ -126,13 +137,9 @@ const BoardMembersModal = ({
                 <option value="Admin">Admin</option>
               </select>
 
-              <button
-                type="submit"
-                disabled={isAdding || !email.trim()}
-                className="cursor-pointer rounded-full bg-brand-dark px-4 py-2 text-sm font-semibold text-white hover:bg-brand disabled:cursor-not-allowed disabled:opacity-50"
-              >
+              <Button type="submit" disabled={isAdding || !email.trim()}>
                 {isAdding ? 'Adding…' : 'Add'}
-              </button>
+              </Button>
             </div>
           </form>
         ) : (
@@ -140,6 +147,7 @@ const BoardMembersModal = ({
         )}
       </div>
     </div>
+    </>
   )
 }
 

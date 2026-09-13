@@ -1,6 +1,8 @@
 import { useEffect } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import './App.css'
+import logo from './assets/logo.webp'
+import { Spinner } from './components/ui/Skeleton'
 import Layout from './layouts/Layout'
 import Home from './pages/Home'
 import Login from './pages/Login'
@@ -9,6 +11,8 @@ import CreateWorkspace from './pages/CreateWorkspace'
 import CreateBoard from './pages/CreateBoard'
 import Dashboard from './pages/Dashboard'
 import WorkspaceSettings from './pages/WorkspaceSettings'
+import WorkspaceSelector from './pages/WorkspaceSelector'
+import Members from './pages/Members'
 import Boards from './pages/Boards'
 import BoardDetail from './pages/BoardDetail'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -36,8 +40,9 @@ function App() {
   // A persisted workspace is enough to route on, so only block without one.
   if (isLoggedIn && !workspace && !isResolved) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <p className="text-sm text-gray-500">Loading…</p>
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-gray-50">
+        <img src={logo} alt="cardo" className="h-9 w-auto" />
+        <Spinner className="h-6 w-6" />
       </div>
     )
   }
@@ -85,6 +90,22 @@ function App() {
         element={
           <ProtectedRoute>
             <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/workspaces"
+        element={
+          <ProtectedRoute>
+            <WorkspaceSelector />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/members"
+        element={
+          <ProtectedRoute>
+            <Members />
           </ProtectedRoute>
         }
       />

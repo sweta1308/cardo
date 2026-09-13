@@ -68,9 +68,9 @@ const ListColumn = ({
 
   return (
     <div
-      className={`flex w-72 shrink-0 flex-col rounded-xl bg-gray-100 p-3 ${isDraggedList ? 'opacity-40' : ''} ${
-        draggingListId !== null && !isDraggedList ? 'border-l-2 border-brand' : ''
-      }`}
+      className={`flex w-72 shrink-0 flex-col rounded-xl border border-gray-200 bg-gray-50 p-3 ${
+        isDraggedList ? 'opacity-40' : ''
+      } ${draggingListId !== null && !isDraggedList ? 'border-l-2 border-l-brand' : ''}`}
       onDragOver={allowDrop}
       onDrop={(e) => handleDrop(e, null)}
       onDragLeave={() => setDropTarget(null)}
@@ -147,12 +147,20 @@ const ListColumn = ({
                 draggingCardId === card.id ? 'opacity-40' : ''
               } ${isDraft(card.id) ? 'cursor-progress opacity-60' : ''}`}
             >
-              <p className="text-sm text-gray-800">{card.title}</p>
+              <p className="text-sm font-medium text-gray-800">{card.title}</p>
+
+              {card.description && !isDraft(card.id) && (
+                <p className="mt-1 line-clamp-2 text-xs text-gray-500">{card.description}</p>
+              )}
+
               {isDraft(card.id) ? (
-                <p className="mt-1 text-xs text-gray-400">Saving…</p>
+                <p className="mt-2 text-xs text-gray-400">Saving…</p>
               ) : (
                 card.due_date && (
-                  <p className="mt-1 text-xs text-gray-400">Due {new Date(card.due_date).toLocaleDateString()}</p>
+                  <span className="mt-2 inline-flex items-center gap-1 rounded-md bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
+                    <span aria-hidden="true">🗓</span>
+                    {new Date(card.due_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                  </span>
                 )
               )}
             </button>

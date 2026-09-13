@@ -5,6 +5,7 @@ import { inputClass, labelClass } from '../components/Auth/formStyles'
 import DashboardLayout from '../components/Dashboard/DashboardLayout'
 import OnboardingShell from '../components/Onboarding/OnboardingShell'
 import Seo from '../components/Seo'
+import Button from '../components/ui/Button'
 import { ApiError, createBoard } from '../lib/api'
 import { BOARD_BACKGROUNDS } from '../lib/boardColors'
 
@@ -101,13 +102,9 @@ const CreateBoard = () => {
             </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={isSubmitting || !name.trim() || !description.trim()}
-            className="w-full cursor-pointer rounded-full bg-brand-dark py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand disabled:cursor-not-allowed disabled:opacity-50"
-          >
+          <Button type="submit" disabled={isSubmitting || !name.trim() || !description.trim()} className="w-full">
             {isSubmitting ? 'Creating board…' : 'Create board →'}
-          </button>
+          </Button>
         </form>
       </div>
     </div>

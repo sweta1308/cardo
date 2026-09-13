@@ -1,11 +1,15 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { Navigate, useNavigate, useParams } from 'react-router-dom'
+import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import BoardMembersModal from '../components/Board/BoardMembersModal'
+import BoardSkeleton from '../components/Board/BoardSkeleton'
 import CardModal from '../components/Board/CardModal'
 import ListColumn from '../components/Board/ListColumn'
 import DashboardLayout from '../components/Dashboard/DashboardLayout'
 import Seo from '../components/Seo'
+import { AvatarGroup } from '../components/ui/Avatar'
+import { buttonClass } from '../components/ui/Button'
+import { useConfirm } from '../components/ui/ConfirmDialog'
 import { ApiError, deleteBoard, updateBoard, type Card } from '../lib/api'
 import { BOARD_BACKGROUNDS } from '../lib/boardColors'
 import { useBoardStore } from '../store/boardStore'
@@ -32,6 +36,7 @@ const BoardDetail = () => {
   const workspace = useWorkspaceStore((state) => state.workspace)
   const refreshBoards = useBoardsStore((state) => state.fetchBoards)
 
+  const { confirm, dialog } = useConfirm()
   const [notFound, setNotFound] = useState(false)
   const [openCard, setOpenCard] = useState<Card | null>(null)
   const [addingToList, setAddingToList] = useState<number | null>(null)
@@ -126,7 +131,14 @@ const BoardDetail = () => {
 
   const handleDeleteBoard = async () => {
     if (!board) return
-    if (!window.confirm(`Delete "${board.name}"? This removes its lists and cards too.`)) return
+
+    const ok = await confirm({
+      title: `Delete "${board.name}"?`,
+      message: 'This board and all of its lists and cards will be permanently deleted.',
+      confirmLabel: 'Delete board',
+      danger: true,
+    })
+    if (!ok) return
 
     try {
       await deleteBoard(board.id)
@@ -138,9 +150,19 @@ const BoardDetail = () => {
     }
   }
 
-  const handleDeleteList = (listId: number) => {
+  const handleDeleteList = async (listId: number) => {
     const list = lists.find((l) => l.id === listId)
-    if (list?.cards.length && !window.confirm(`Delete "${list.name}" and its ${list.cards.length} card(s)?`)) return
+
+    if (list?.cards.length) {
+      const ok = await confirm({
+        title: `Delete "${list.name}"?`,
+        message: `This list and its ${list.cards.length} ${list.cards.length === 1 ? 'card' : 'cards'} will be deleted.`,
+        confirmLabel: 'Delete list',
+        danger: true,
+      })
+      if (!ok) return
+    }
+
     run(removeList(listId))
   }
 
@@ -148,50 +170,49 @@ const BoardDetail = () => {
     <DashboardLayout>
       <Seo title={board?.name ?? 'Board'} description="View your board's lists and cards." />
 
-      <div
-        className="flex flex-wrap items-center justify-between gap-3 rounded-xl px-6 py-5 text-white"
-        style={{ backgroundColor: board?.background ?? '#05373e' }}
-      >
-        {isRenamingBoard ? (
-          <form onSubmit={handleRenameBoard}>
-            <input
-              autoFocus
-              value={boardName}
-              onChange={(e) => setBoardName(e.target.value)}
-              onBlur={handleRenameBoard}
-              className="rounded border-none bg-white/20 px-2 py-1 text-lg font-bold text-white outline-none placeholder:text-white/60"
-            />
-          </form>
-        ) : (
-          <button
-            type="button"
-            onClick={() => setIsRenamingBoard(true)}
-            className="cursor-pointer text-left text-lg font-bold sm:text-xl"
-            title="Rename board"
-          >
-            {board?.name ?? 'Loading…'}
-          </button>
-        )}
+      <nav className="flex items-center gap-2 text-sm text-gray-400">
+        <Link to="/boards" className="hover:text-gray-600">
+          Boards
+        </Link>
+        <span aria-hidden="true">›</span>
+        <span className="text-gray-600">{board?.name ?? '…'}</span>
+      </nav>
+
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <span className="h-8 w-8 shrink-0 rounded-lg" style={{ backgroundColor: board?.background ?? '#05373e' }} />
+
+          {isRenamingBoard ? (
+            <form onSubmit={handleRenameBoard}>
+              <input
+                autoFocus
+                value={boardName}
+                onChange={(e) => setBoardName(e.target.value)}
+                onBlur={handleRenameBoard}
+                className="rounded-lg border border-brand px-2 py-1 text-xl font-bold text-gray-900 outline-none"
+              />
+            </form>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setIsRenamingBoard(true)}
+              className="cursor-pointer text-left text-xl font-bold text-gray-900"
+              title="Rename board"
+            >
+              {board?.name ?? 'Loading…'}
+            </button>
+          )}
+        </div>
 
         <div className="flex items-center gap-2">
-          <div className="flex -space-x-2">
-            {members.slice(0, 4).map((member) => (
-              <span
-                key={member.id}
-                title={`${member.name} (${member.role})`}
-                className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-white/30 bg-brand text-xs font-semibold text-white"
-              >
-                {member.name.charAt(0).toUpperCase()}
-              </span>
-            ))}
-          </div>
+          <AvatarGroup names={members.map((m) => m.name)} />
 
           <div className="relative">
             <button
               type="button"
               onClick={() => setShowColors((open) => !open)}
               aria-expanded={showColors}
-              className="cursor-pointer rounded-full bg-white/15 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/25"
+              className={buttonClass('secondary', 'sm')}
             >
               Background
             </button>
@@ -215,26 +236,18 @@ const BoardDetail = () => {
             )}
           </div>
 
-          <button
-            type="button"
-            onClick={() => setShowMembers(true)}
-            className="cursor-pointer rounded-full bg-white/15 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/25"
-          >
-            Share
+          <button type="button" onClick={() => setShowMembers(true)} className={buttonClass('primary', 'sm')}>
+            + Invite
           </button>
 
-          <button
-            type="button"
-            onClick={handleDeleteBoard}
-            className="cursor-pointer rounded-full bg-white/15 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/25"
-          >
-            Delete board
+          <button type="button" onClick={handleDeleteBoard} className={buttonClass('ghost', 'sm')}>
+            Delete
           </button>
         </div>
       </div>
 
       {isLoading && lists.length === 0 ? (
-        <p className="mt-6 text-sm text-gray-500">Loading board…</p>
+        <BoardSkeleton />
       ) : (
         <div className="mt-6 flex items-start gap-4 overflow-x-auto pb-4">
           {lists.map((list) => (
@@ -309,6 +322,8 @@ const BoardDetail = () => {
           </div>
         </div>
       )}
+
+      {dialog}
 
       {showMembers && board && (
         <BoardMembersModal

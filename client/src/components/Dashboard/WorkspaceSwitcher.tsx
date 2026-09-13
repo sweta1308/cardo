@@ -83,18 +83,33 @@ const WorkspaceSwitcher = () => {
             </button>
           ))}
 
-          <button
-            type="button"
-            role="menuitem"
-            onClick={() => {
-              setIsOpen(false)
-              navigate('/onboarding')
-            }}
-            className="mt-1 flex w-full cursor-pointer items-center gap-2 border-t border-gray-100 px-3 py-2 text-left text-sm font-medium text-brand-dark hover:bg-gray-50"
-          >
-            <span aria-hidden="true">+</span>
-            Create workspace
-          </button>
+          <div className="mt-1 border-t border-gray-100">
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setIsOpen(false)
+                navigate('/workspaces')
+              }}
+              className="flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-sm text-gray-600 hover:bg-gray-50"
+            >
+              <span aria-hidden="true">⧉</span>
+              All workspaces
+            </button>
+
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setIsOpen(false)
+                navigate('/onboarding')
+              }}
+              className="flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-sm font-medium text-brand-dark hover:bg-gray-50"
+            >
+              <span aria-hidden="true">+</span>
+              Create workspace
+            </button>
+          </div>
         </div>
       )}
     </div>

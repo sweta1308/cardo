@@ -5,6 +5,7 @@ import AuthShell from '../components/Auth/AuthShell'
 import PasswordInput from '../components/Auth/PasswordInput'
 import { inputClass, labelClass } from '../components/Auth/formStyles'
 import Seo from '../components/Seo'
+import Button from '../components/ui/Button'
 import { ApiError, login } from '../lib/api'
 import { useAuthStore } from '../store/authStore'
 import { useWorkspaceStore } from '../store/workspaceStore'
@@ -42,9 +43,9 @@ const Login = () => {
         description="Sign in to your Cardo workspace to plan sprints, track tasks, and collaborate with your team."
       />
       <h1 className="text-2xl font-bold text-gray-900">
-        Welcome back <span aria-hidden="true">👋</span>
+        Welcome back! <span aria-hidden="true">👋</span>
       </h1>
-      <p className="mt-1 text-sm text-gray-500">Sign in to your workspace</p>
+      <p className="mt-1 text-sm text-gray-500">Log in to continue to cardo</p>
 
       <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
         <div>
@@ -72,13 +73,9 @@ const Login = () => {
           onChange={setPassword}
         />
 
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full cursor-pointer rounded-full bg-brand-dark py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {isSubmitting ? 'Signing in…' : 'Sign in'}
-        </button>
+        <Button type="submit" disabled={isSubmitting} className="w-full">
+          {isSubmitting ? 'Signing in…' : 'Log in'}
+        </Button>
       </form>
 
       <p className="mt-6 text-center text-sm text-gray-500">

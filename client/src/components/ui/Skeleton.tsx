@@ -1,0 +1,13 @@
+const Skeleton = ({ className = '' }: { className?: string }) => (
+  <div className={`animate-pulse rounded-md bg-gray-200 ${className}`} />
+)
+
+export const Spinner = ({ className = 'h-5 w-5' }: { className?: string }) => (
+  <span
+    role="status"
+    aria-label="Loading"
+    className={`inline-block animate-spin rounded-full border-2 border-gray-200 border-t-brand ${className}`}
+  />
+)
+
+export default Skeleton

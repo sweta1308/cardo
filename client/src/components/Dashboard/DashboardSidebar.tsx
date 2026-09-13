@@ -16,9 +16,13 @@ interface NavLinkProps {
 const NavLink = ({ to, icon, label, active }: NavLinkProps) => (
   <Link
     to={to}
-    className={`${navItemClass} ${active ? 'bg-white/15 font-semibold text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}
+    className={`${navItemClass} ${
+      active ? 'bg-white/15 font-semibold text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'
+    }`}
   >
-    <span aria-hidden="true">{icon}</span>
+    <span aria-hidden="true" className="w-4 text-center">
+      {icon}
+    </span>
     {label}
   </Link>
 )
@@ -30,8 +34,8 @@ const DashboardSidebar = () => {
 
   return (
     <aside className="hidden flex-col gap-5 overflow-y-auto bg-brand-dark px-4 py-6 md:sticky md:top-0 md:flex md:h-screen">
-      <Link to="/boards" className="px-3">
-        <img src={logoWhite} alt="cardo" className="h-12 w-auto" />
+      <Link to="/dashboard" className="px-2">
+        <img src={logoWhite} alt="cardo" className="h-9 w-auto" />
       </Link>
 
       <WorkspaceSwitcher />
@@ -39,13 +43,14 @@ const DashboardSidebar = () => {
       <nav className="flex flex-col gap-1">
         <NavLink to="/dashboard" icon="⌂" label="Home" active={pathname === '/dashboard'} />
         <NavLink to="/boards" icon="▦" label="Boards" active={pathname.startsWith('/boards')} />
+        <NavLink to="/members" icon="👥" label="Members" active={pathname === '/members'} />
         <NavLink to="/settings" icon="⚙" label="Settings" active={pathname === '/settings'} />
       </nav>
 
-      <div>
-        <p className="px-3 text-xs font-semibold uppercase tracking-wide text-white/40">Your boards</p>
+      <div className="min-h-0 flex-1">
+        <p className="px-3 text-[11px] font-semibold uppercase tracking-wider text-white/40">Your boards</p>
 
-        <div className="mt-2 flex flex-col gap-1">
+        <div className="mt-2 flex flex-col gap-0.5">
           {boards.map((board) => (
             <Link
               key={board.id}
@@ -66,7 +71,9 @@ const DashboardSidebar = () => {
               to={`/boards/new?workspaceId=${workspace.id}`}
               className={`${navItemClass} text-white/70 hover:bg-white/10 hover:text-white`}
             >
-              <span aria-hidden="true">+</span>
+              <span aria-hidden="true" className="w-4 text-center">
+                +
+              </span>
               Create board
             </Link>
           )}

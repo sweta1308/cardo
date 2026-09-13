@@ -5,6 +5,7 @@ import AuthShell from '../components/Auth/AuthShell'
 import PasswordInput from '../components/Auth/PasswordInput'
 import { inputClass, labelClass } from '../components/Auth/formStyles'
 import Seo from '../components/Seo'
+import Button from '../components/ui/Button'
 import { ApiError, signup } from '../lib/api'
 import { useAuthStore } from '../store/authStore'
 
@@ -45,7 +46,7 @@ const Register = () => {
         description="Create your free Cardo account and start planning sprints, tracking tasks, and collaborating with your team today."
       />
       <h1 className="text-2xl font-bold text-gray-900">Create your account</h1>
-      <p className="mt-1 text-sm text-gray-500">Get started with cardo</p>
+      <p className="mt-1 text-sm text-gray-500">Start organizing your work in minutes. No credit card required.</p>
 
       <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
         <div>
@@ -98,13 +99,9 @@ const Register = () => {
           onChange={setConfirmPassword}
         />
 
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full cursor-pointer rounded-full bg-brand-dark py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand disabled:cursor-not-allowed disabled:opacity-60"
-        >
+        <Button type="submit" disabled={isSubmitting} className="w-full">
           {isSubmitting ? 'Creating account…' : 'Create account'}
-        </button>
+        </Button>
       </form>
 
       <p className="mt-6 text-center text-sm text-gray-500">
